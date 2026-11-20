@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -30,6 +31,7 @@ REQUIRED = {
         "sql/dws/schema.sql", "sql/ads/schema.sql", "deploy/docker-compose.yml",
         "scripts/export_init_data.py", "scripts/check_reconciliation.py", "scripts/load_test.py",
         "scripts/security_check.py", "backend/app/llm/nl2sql.py", "backend/app/services/knowledge.py",
+        "backend/tests/test_edge_cases.py",
     ],
     "data": [
         "data/mock_his/his_outpatient.csv", "data/mock_his/his_inpatient.csv",
@@ -147,6 +149,9 @@ def main():
     assert security["summary"]["failed"] == 0
     assert reconciliation["summary"]["failed"] == 0
     assert load["failure"] == 0
+    coverage_root = ET.parse(PROJECT / "data/derived/coverage.xml").getroot()
+    coverage_rate = round(float(coverage_root.attrib["line-rate"])*100, 2)
+    assert coverage_rate >= 85, coverage_rate
     report = {
         "required_files": sum(len(items) for items in REQUIRED.values()),
         "missing_files": missing,
@@ -170,6 +175,7 @@ def main():
             "reconciliation": f"{reconciliation['summary']['passed']}/{reconciliation['summary']['total']}",
             "load": f"{load['success']}/{load['requests']}",
             "p95_ms": load["latency_ms"]["p95"],
+            "backend_coverage_pct": coverage_rate,
         },
         "screenshot_status": "用户提交项，目录和命名清单已准备",
         "demo_video": "按用户要求不制作",
