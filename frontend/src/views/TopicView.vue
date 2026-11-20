@@ -160,6 +160,7 @@ onMounted(async () => {
     <div v-if="data.cards.length" class="metrics-grid" :style="{ '--cols': cardColumns }">
       <MetricCard v-for="(card, index) in data.cards" :key="card.key" :card="card" :index="index" />
     </div>
+    <p v-if="data.card_note" class="card-note">{{ data.card_note }}</p>
 
     <div class="dashboard-grid" :class="{ single: !hasTrend }">
       <section v-if="hasTrend" class="card">
@@ -230,6 +231,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.card-note {
+  margin: -4px 2px 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
 .dashboard-grid.single {
   grid-template-columns: minmax(0, 1fr);
 }

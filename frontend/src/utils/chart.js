@@ -72,13 +72,17 @@ export function barOption({ categories = [], values = [], name = '数量', horiz
     data: categories,
     ...axisStyle,
     splitLine: { show: false },
-    axisLabel: { color: '#61738a', fontSize: 11, interval: 0, width: horizontal ? 90 : 80, overflow: 'truncate' },
+    axisLabel: {
+      color: '#61738a', fontSize: 11, interval: 0, width: horizontal ? 90 : 80, overflow: 'truncate',
+      // 分类较多时倾斜标签，避免科室名互相压字。
+      ...(horizontal ? {} : { rotate: categories.length > 6 ? 32 : 0 }),
+    },
   }
   const valueAxis = { type: 'value', ...axisStyle }
   return {
     color: [color],
     tooltip: { ...tooltipStyle, axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(47, 124, 246, 0.04)' } } },
-    grid: { left: 14, right: 24, top: 22, bottom: 12, containLabel: true },
+    grid: { left: 14, right: 24, top: 22, bottom: horizontal || categories.length <= 6 ? 12 : 30, containLabel: true },
     xAxis: horizontal ? valueAxis : categoryAxis,
     yAxis: horizontal ? { ...categoryAxis, inverse: true } : valueAxis,
     series: [{

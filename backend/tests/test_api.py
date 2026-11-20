@@ -61,6 +61,18 @@ def test_all_theme_endpoints(client, admin_headers):
     assert resources["table"]["rows"][0]["turnover"] is not None
 
 
+def test_disease_cards_and_resource_order(client, admin_headers):
+    disease = client.get("/api/v1/analytics/disease", headers=admin_headers).json()["data"]
+    labels = [item["label"] for item in disease["cards"]]
+    assert labels[:3] == ["病种数", "病例组合指数CMI", "DRG入组率"]
+    assert disease["cards"][0]["value"] == 10
+    assert disease["card_note"]
+    resources = client.get("/api/v1/analytics/resources", headers=admin_headers).json()["data"]
+    usages = [row["usage"] for row in resources["table"]["rows"]]
+    assert usages == sorted(usages, reverse=True)
+    assert sum(row["beds"] for row in resources["table"]["rows"]) == 375
+
+
 def test_metric_values_and_unsupported(client, admin_headers):
     response = client.get("/api/v1/metrics/K12/values?grain=month", headers=admin_headers)
     assert response.status_code == 200

@@ -91,6 +91,7 @@ onMounted(async () => {
     <div v-if="data.cards.length" class="metrics-grid resource-metrics" :style="{ '--cols': data.cards.length }">
       <MetricCard v-for="(card, index) in data.cards" :key="card.key" :card="card" :index="index" />
     </div>
+    <p class="resource-note">床位使用率 = 实际占用床日 ÷ 开放床日；科室明细按编制床位（合计 375 张，来自 dim_department 教学配置）计算，全院卡片按实际开放床位 345 张（急诊科 30 张观察床不计入住院开放床位），两者口径不同，不能直接加权还原。床位周转次数 = 出院人次 ÷ 平均开放床位。</p>
 
     <div class="resource-charts">
       <section class="card">
@@ -125,7 +126,14 @@ onMounted(async () => {
 .resource-message.error { color: var(--danger); background: var(--danger-soft); }
 .resource-message.success { color: var(--success); background: var(--success-soft); }
 .resource-message span { flex: 1; }
-.resource-metrics { margin-bottom: 18px; }
+.resource-metrics { margin-bottom: 10px; }
+
+.resource-note {
+  margin: 0 2px 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
 .resource-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 18px; }
 .chart-body { padding-top: 10px; padding-bottom: 10px; }
 .resource-table { overflow: hidden; }

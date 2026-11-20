@@ -232,6 +232,7 @@ def analytics(topic, start, end, user, dept_code=None):
         table = {"columns": [], "rows": []}
         chart_type = "line"
         trend_available = True
+        card_note = ""
         if topic == "revenue":
             distribution = [{"name": "门诊收入", "value": cards[1]["value"]}, {"name": "住院收入", "value": cards[2]["value"]}]
             fee_rows = conn.execute("SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params])
@@ -245,15 +246,22 @@ def analytics(topic, start, end, user, dept_code=None):
                      "rows": [{"name": r[0], "value": round(r[1], 2), "share": safe_ratio(r[1], total_fee, 100)} for r in rows]}
         elif topic == "disease":
             disease_where = where
-            rows = conn.execute("SELECT i.disease_code,d.disease_name,COUNT(*) n,AVG(i.total_fee),AVG(i.stay_days) FROM dwd_inpatient_stay i JOIN dim_disease d USING(disease_code) WHERE i.discharge_date BETWEEN ? AND ? AND "+disease_where.replace("dept_code", "i.dept_code")+" GROUP BY 1,2 ORDER BY n DESC", [start, end, *params])
+            rows = conn.execute("SELECT i.disease_code,d.disease_name,COUNT(*) n,AVG(i.total_fee),AVG(i.stay_days) FROM dwd_inpatient_stay i JOIN dim_disease d USING(disease_code) WHERE i.discharge_date BETWEEN ? AND ? AND "+disease_where.replace("dept_code", "i.dept_code")+" GROUP BY 1,2 ORDER BY n DESC", [start, end, *params]).fetchall()
             distribution = [{"name": r[1], "value": r[2], "avg_fee": round(r[3], 2), "avg_days": round(r[4], 2)} for r in rows]
             table = {"columns": [{"key": "name", "label": "病种"}, {"key": "value", "label": "出院人次"}, {"key": "avg_fee", "label": "次均费用（元）", "format": "money"}, {"key": "avg_days", "label": "平均住院日"}], "rows": distribution}
+            # 病种数按有编码的出院病例去重统计；卡片顺序对齐示范页：病种数、平均CMI、DRG入组率。
+            disease_card = {"key": "disease_count", "label": "病种数", "value": len({r[0] for r in rows}), "unit": "种", "format": "number"}
+            by_key = {item["key"]: item for item in cards}
+            cards = [disease_card] + [by_key[code] for code in ("K27", "K26", "K28", "K29") if code in by_key]
+            card_note = "病种数按有疾病编码的出院病例去重；CMI 与费用/时间消耗指数均以本院同病种均值归一，全院全期口径下恒为 1.00，下钻科室或切换单月才有区分度。"
             trends = []
             trend_available = False
             chart_type = "bar"
         elif topic == "resources":
             rows = conn.execute("SELECT d.dept_code,d.dept_name,d.bed_count,d.staff_count,SUM(s.outpatient_visits),SUM(s.discharges),SUM(s.occupied_bed_days),SUM(s.open_bed_days),SUM(s.total_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1,2,3,4 ORDER BY 8 DESC", [start, end, *params]).fetchall()
             table_rows = [{"name": r[1], "beds": r[2], "staff": r[3], "usage": safe_ratio(r[6], r[7], 100), "turnover": safe_ratio(r[5]*((date.fromisoformat(end)-date.fromisoformat(start)).days+1), r[7]), "revenue": r[8]} for r in rows]
+            # 与示范页一致：按床位使用率倒序，空缺值排在最后。
+            table_rows.sort(key=lambda row: (row["usage"] is None, -(row["usage"] or 0)))
             distribution = [{"name": row["name"], "value": row["usage"]} for row in table_rows]
             secondary_distribution = [{"name": row["name"], "value": row["turnover"]} for row in table_rows]
             table = {"columns": [{"key": "name", "label": "科室"}, {"key": "beds", "label": "教学配置床位"}, {"key": "usage", "label": "床位使用率"}, {"key": "turnover", "label": "床位周转次数"}, {"key": "staff", "label": "教学配置人力"}, {"key": "revenue", "label": "医疗收入（元）", "format": "money"}], "rows": table_rows}
@@ -299,5 +307,5 @@ def analytics(topic, start, end, user, dept_code=None):
             source_note += "；各科室源记录均为 900 条（课程数据集等量抽样），患者数与次均费用各不相同"
         return {"cards": cards, "trends": trends, "trend_available": trend_available, "distribution": distribution,
                 "secondary_distribution": secondary_distribution if topic == "resources" else [], "table": table,
-                "chart_type": chart_type, "bar_title": titles.get(topic, "结构分布"), "source_note": source_note,
+                "chart_type": chart_type, "bar_title": titles.get(topic, "结构分布"), "source_note": source_note, "card_note": card_note,
                 "period": {"start": start, "end": end}}
