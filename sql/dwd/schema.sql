@@ -100,5 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_inpatient_dates
     ON dwd_inpatient_stay (discharge_date, admit_date, dept_code);
 CREATE INDEX IF NOT EXISTS idx_charge_date
     ON dwd_charge_detail (fee_date, dept_code, visit_type);
+CREATE INDEX IF NOT EXISTS idx_charge_fee_date_type_amount
+    ON dwd_charge_detail (fee_date, fee_type_name, amount);
 CREATE INDEX IF NOT EXISTS idx_encounter_wide_date
     ON dwd_encounter_wide (start_date, dept_code);

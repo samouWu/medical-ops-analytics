@@ -167,9 +167,10 @@ def test_governance_metadata_and_sources(client, admin_headers):
     sources = client.get("/api/v1/data-sources", headers=admin_headers)
     assert sources.status_code == 200
     assert len(sources.json()["data"]) == 6
-    connected = client.post("/api/v1/data-sources/his_outpatient/test", headers=admin_headers)
-    assert connected.status_code == 200
-    assert connected.json()["data"]["connected"] is True
+    for source in sources.json()["data"]:
+        connected = client.post(f"/api/v1/data-sources/{source['id']}/test", headers=admin_headers)
+        assert connected.status_code == 200
+        assert connected.json()["data"]["connected"] is True, source["id"]
     users = client.get("/api/v1/users", headers=admin_headers)
     assert users.status_code == 200
     assert {item["role"] for item in users.json()["data"]} == {"admin", "analyst", "department"}

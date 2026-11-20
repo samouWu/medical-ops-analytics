@@ -1,5 +1,7 @@
 import json
+import logging
 import sqlite3
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -163,6 +165,7 @@ CREATE TABLE IF NOT EXISTS data_source (
 CREATE INDEX IF NOT EXISTS idx_outpatient_date ON dwd_outpatient_visit(visit_date, dept_code);
 CREATE INDEX IF NOT EXISTS idx_inpatient_dates ON dwd_inpatient_stay(discharge_date, admit_date, dept_code);
 CREATE INDEX IF NOT EXISTS idx_charge_date ON dwd_charge_detail(fee_date, dept_code, visit_type);
+CREATE INDEX IF NOT EXISTS idx_charge_fee_date_type_amount ON dwd_charge_detail(fee_date, fee_type_name, amount);
 CREATE INDEX IF NOT EXISTS idx_encounter_wide_date ON dwd_encounter_wide(start_date, dept_code);
 CREATE INDEX IF NOT EXISTS idx_dws_date ON dws_dept_day(stat_date, dept_code);
 CREATE INDEX IF NOT EXISTS idx_dws_outpatient_date ON dws_outpatient_day(stat_date, dept_code);
@@ -203,6 +206,7 @@ def connect() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("PRAGMA busy_timeout=30000")
     conn.execute("PRAGMA journal_mode=WAL")
     return conn
 
@@ -268,6 +272,16 @@ def get_user(username: str) -> dict | None:
 
 
 def audit(username: str, action: str, resource: str, detail: str, trace_id: str) -> None:
-    with db_session() as conn:
-        conn.execute("INSERT INTO audit_log(trace_id,username,action,resource,detail,created_at) VALUES (?,?,?,?,?,?)",
-                     (trace_id, username, action, resource, detail[:500], datetime.now(timezone.utc).isoformat()))
+    """审计为尽力写入：短暂锁冲突重试，最终失败记录告警但不破坏业务响应。"""
+    for attempt in range(3):
+        try:
+            with db_session() as conn:
+                conn.execute("INSERT INTO audit_log(trace_id,username,action,resource,detail,created_at) VALUES (?,?,?,?,?,?)",
+                             (trace_id, username, action, resource, detail[:500], datetime.now(timezone.utc).isoformat()))
+            return
+        except sqlite3.OperationalError as exc:
+            if attempt < 2 and ("locked" in str(exc).lower() or "readonly" in str(exc).lower()):
+                time.sleep(0.05*(attempt+1))
+                continue
+            logging.getLogger(__name__).warning("audit write failed: %s", exc)
+            return

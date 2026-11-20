@@ -14,8 +14,8 @@
     </Box>
     <Box style={{ flex: 1, background: '#E8EFF8', borderRadius: 9, padding: 16 }}>
       <Text style={{ fontSize: 17, color: '#4A5568' }}>后端覆盖率</Text>
-      <Text style={{ fontSize: 52, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>81.92%</Text>
-      <Text style={{ fontSize: 16, color: '#4A5568' }}>1,272语句/230未覆盖</Text>
+      <Text style={{ fontSize: 52, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>81.62%</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>1,284语句/236未覆盖</Text>
     </Box>
     <Box style={{ flex: 1, background: '#E8EFF8', borderRadius: 9, padding: 16 }}>
       <Text style={{ fontSize: 17, color: '#4A5568' }}>前端</Text>
