@@ -1,0 +1,56 @@
+<Slide style={{ width: 1280, height: 720, background: '#FFFFFF', padding: 60 }}>
+  <Box style={{ width: '100%', height: 8, background: '#1E4FA8', position: 'absolute', top: 0, left: 0 }} />
+  <Box style={{ flexDirection: 'column', gap: 8, height: 112 }}>
+    <Text style={{ fontSize: 18, color: '#1E4FA8', fontWeight: 'bold', letterSpacing: 1 }}>07 / 证据</Text>
+    <Text style={{ fontSize: 38, fontWeight: 'bold', color: '#0E3F8C' }}>权限、测试与评测证据</Text>
+    <Text style={{ fontSize: 20, color: '#4A5568' }}>所有数字来自本轮实际执行；未执行项单独标注，不混入通过结论。</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 14, height: 148, marginTop: 16 }}>
+    <Box style={{ flex: 1, background: '#E8EFF8', borderRadius: 9, padding: 16 }}>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>后端测试</Text>
+      <Text style={{ fontSize: 52, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>30 / 30</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>0失败，1条第三方弃用警告</Text>
+    </Box>
+    <Box style={{ flex: 1, background: '#E8EFF8', borderRadius: 9, padding: 16 }}>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>后端覆盖率</Text>
+      <Text style={{ fontSize: 52, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>81.92%</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>1,272语句/230未覆盖</Text>
+    </Box>
+    <Box style={{ flex: 1, background: '#E8EFF8', borderRadius: 9, padding: 16 }}>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>前端</Text>
+      <Text style={{ fontSize: 52, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>18 / 18</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>E2E 9/9，730模块构建</Text>
+    </Box>
+    <Box style={{ flex: 1, background: '#FFF8E1', borderRadius: 9, padding: 16 }}>
+      <Text style={{ fontSize: 17, color: '#5D4037' }}>50问受控问数</Text>
+      <Text style={{ fontSize: 52, fontWeight: 'bold', color: '#7A4F00', lineHeight: 1.1 }}>100%</Text>
+      <Text style={{ fontSize: 16, color: '#5D4037' }}>50/50，门槛85%</Text>
+    </Box>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 18, height: 314, marginTop: 16 }}>
+    <Box style={{ width: 370, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0E3F8C' }}>安全边界</Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.5 }}>JWT + PBKDF2；admin/analyst/department三角色；科室范围在服务端强制；未登录401、越权403、危险问数403。</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568', lineHeight: 1.45 }}>仍有默认口令、无HTTPS、无限流、无渗透测试等生产缺口。</Text>
+    </Box>
+    <Box style={{ width: 370, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0E3F8C' }}>数据对账</Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.5 }}>六源59,922行/0错误；八DWS共7,679行；ADS 26,136行；月度K16与DWS总收入44,260,283.80元一致。</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568', lineHeight: 1.45 }}>这些是对账证据，不代表真实医院业务验收。</Text>
+    </Box>
+    <Box style={{ width: 384, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0E3F8C' }}>未执行项</Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.5 }}>浏览器E2E、Docker、并发压测、慢SQL、安全专项、真实DeepSeek/Kimi调用、12个月数据。</Text>
+      <Box style={{ background: '#FDECEA', borderRadius: 6, padding: 10 }}>
+        <Text style={{ fontSize: 18, color: '#B03A35' }}>所以不宣称生产验收通过。</Text>
+      </Box>
+    </Box>
+  </Box>
+
+  <Box style={{ position: 'absolute', left: 60, right: 60, top: 674, flexDirection: 'row', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 14, color: '#8B97A8' }}>医疗运营数据主题分析平台</Text>
+    <Text style={{ fontSize: 14, color: '#1E4FA8' }}>08 / 10</Text>
+  </Box>
+</Slide>

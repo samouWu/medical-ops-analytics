@@ -1,0 +1,41 @@
+<Slide style={{ width: 1280, height: 720, background: '#0E3F8C', padding: 60, flexDirection: 'column', justifyContent: 'space-between' }}>
+  <Box style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Text style={{ fontSize: 16, color: '#C9DCF5', letterSpacing: 2 }}>CONCLUSION / NEXT</Text>
+    <Text style={{ fontSize: 16, color: '#C9DCF5' }}>V1.1 / 2026-11-20</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 44, alignItems: 'center' }}>
+    <Box style={{ width: 620, flexDirection: 'column', gap: 18 }}>
+      <Box style={{ width: 72, height: 6, background: '#FFC107', borderRadius: 3 }} />
+      <Text style={{ fontSize: 62, fontWeight: 'bold', color: '#FFFFFF', lineHeight: 1.18 }}>
+        可运行、可追溯、<br />可继续完善
+      </Text>
+      <Text style={{ fontSize: 22, color: '#D7E4F8', lineHeight: 1.55 }}>
+        课程初版已完成核心数据链路、30项可算指标、八主题集市、权限与测试证据；未完成项已明确列出，不用演示效果替代验收结论。
+      </Text>
+    </Box>
+
+    <Box style={{ width: 496, flexDirection: 'column', gap: 14 }}>
+      <Box style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.26)', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 23, fontWeight: 'bold', color: '#FFFFFF' }}>下一步 A</Text>
+        <Text style={{ fontSize: 18, color: '#D7E4F8' }}>补12个月数据、全部ADS预落表和浏览器验收。</Text>
+      </Box>
+      <Box style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.26)', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 23, fontWeight: 'bold', color: '#FFFFFF' }}>下一步 B</Text>
+        <Text style={{ fontSize: 18, color: '#D7E4F8' }}>补自由只读NL2SQL、AST校验与审计，或明确保留受控问数。</Text>
+      </Box>
+      <Box style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.26)', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 23, fontWeight: 'bold', color: '#FFFFFF' }}>下一步 C</Text>
+        <Text style={{ fontSize: 18, color: '#D7E4F8' }}>补Docker、安全、性能和正式试运行签字。</Text>
+      </Box>
+    </Box>
+  </Box>
+
+  <Box style={{ borderTop: '1px solid rgba(255,255,255,0.28)', paddingTop: 18, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+    <Box style={{ flexDirection: 'column', gap: 6 }}>
+      <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#FFFFFF' }}>谢谢，请提问</Text>
+      <Text style={{ fontSize: 16, color: '#BBD0EE' }}>数据来自课程模拟数据；DRG/CMI为教学估算，不用于真实绩效。</Text>
+    </Box>
+    <Text style={{ fontSize: 16, color: '#BBD0EE' }}>医疗运营数据主题分析平台</Text>
+  </Box>
+</Slide>

@@ -1,0 +1,63 @@
+<Slide style={{ width: 1280, height: 720, background: '#FFFFFF', padding: 60 }}>
+  <Box style={{ width: '100%', height: 8, background: '#1E4FA8', position: 'absolute', top: 0, left: 0 }} />
+  <Box style={{ flexDirection: 'column', gap: 8, height: 112 }}>
+    <Text style={{ fontSize: 18, color: '#1E4FA8', fontWeight: 'bold', letterSpacing: 1 }}>05 / 指标体系</Text>
+    <Text style={{ fontSize: 38, fontWeight: 'bold', color: '#0E3F8C' }}>30 项可算指标如何解释</Text>
+    <Text style={{ fontSize: 20, color: '#4A5568' }}>指标不是一列数字：要同时说明分子、分母、时间范围和适用边界。</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 18, height: 340, marginTop: 16 }}>
+    <Box style={{ width: 800, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 9, padding: 14 }}>
+      <Table
+        style={{ width: '100%', height: 308 }}
+        defaultTextStyle={{ fontSize: 18, textAlign: 'left', color: '#1A2230' }}
+        defaultCellStyle={{
+          border: {
+            left: { width: 1, color: '#E5E7EB' },
+            right: { width: 1, color: '#E5E7EB' },
+            top: { width: 1, color: '#E5E7EB' },
+            bottom: { width: 1, color: '#E5E7EB' },
+          },
+          padding: 8,
+        }}
+        cells={[
+          [
+            { text: '指标', textStyle: { bold: true, color: '#FFFFFF' }, cellStyle: { background: { color: '#0E3F8C' } } },
+            { text: '本期结果', textStyle: { bold: true, color: '#FFFFFF' }, cellStyle: { background: { color: '#0E3F8C' } } },
+            { text: '口径要点', textStyle: { bold: true, color: '#FFFFFF' }, cellStyle: { background: { color: '#0E3F8C' } } },
+            { text: '边界', textStyle: { bold: true, color: '#FFFFFF' }, cellStyle: { background: { color: '#0E3F8C' } } },
+          ],
+          ['K01 门诊人次', '9,000', '门诊记录数，同一患者多次计多次', '源无就诊状态'],
+          ['K02 门诊人数', '3,382', '统计期患者标识去重', '跨日不能相加'],
+          ['K12 床位使用率', '45.72%', '占用床日 / 开放床日', '床位为教学配置'],
+          ['K13 平均住院日', '9.49 天', '出院患者住院日 / 出院人次', '非同日出院按出院日'],
+          ['K16 医疗总收入', '1,444.18 万', '收费明细净额，6月全院', '财务文件不混算'],
+          ['K37 人均就诊次数', '1.48 次/人', '门诊人次 / 门诊患者人数', '不等于复诊率'],
+          ['K39 检验异常率', '15.83%', '异常/阳性报告 / 总报告', '不等于临床诊断'],
+        ]}
+      />
+    </Box>
+
+    <Box style={{ width: 342, flexDirection: 'column', gap: 12 }}>
+      <Box style={{ height: 150, background: '#E8EFF8', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 48, fontWeight: 'bold', color: '#0E3F8C' }}>30 / 39</Text>
+        <Text style={{ fontSize: 20, color: '#1A2230', fontWeight: 'bold' }}>正式可算 / 目录总数</Text>
+        <Text style={{ fontSize: 17, color: '#4A5568' }}>达到课程“至少30项可算”的硬门槛。</Text>
+      </Box>
+      <Box style={{ height: 178, background: '#FFF8E1', border: '1px solid #FFE082', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 23, fontWeight: 'bold', color: '#7A4F00' }}>9项明确不可算</Text>
+        <Text style={{ fontSize: 18, color: '#5D4037', lineHeight: 1.4 }}>K03/04/05 缺预约退号；K15 缺手术；K30 缺设备；K33 缺成本；K34/35 缺候诊和满意度；K36 缺报告时限。</Text>
+      </Box>
+    </Box>
+  </Box>
+
+  <Box style={{ height: 82, marginTop: 16, background: '#F0F5FC', borderRadius: 8, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 18 }}>
+    <Text style={{ fontSize: 23, fontWeight: 'bold', color: '#0E3F8C' }}>判断</Text>
+    <Text style={{ fontSize: 19, color: '#4A5568', lineHeight: 1.4 }}>数量达标不是终点：K26—K29 是教学估算，K25 缺上年数据时返回空，所有比率零分母都为空值，不用0伪装。</Text>
+  </Box>
+
+  <Box style={{ position: 'absolute', left: 60, right: 60, top: 674, flexDirection: 'row', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 14, color: '#8B97A8' }}>医疗运营数据主题分析平台</Text>
+    <Text style={{ fontSize: 14, color: '#1E4FA8' }}>06 / 10</Text>
+  </Box>
+</Slide>

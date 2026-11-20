@@ -1,0 +1,190 @@
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import PageHeader from '../components/PageHeader.vue'
+import FilterBar from '../components/FilterBar.vue'
+import MetricCard from '../components/MetricCard.vue'
+import LineChart from '../components/charts/LineChart.vue'
+import BarChart from '../components/charts/BarChart.vue'
+import StateBlock from '../components/StateBlock.vue'
+import AppIcon from '../components/AppIcon.vue'
+import { request } from '../api/client'
+import { appState, filterParams, filters, loadMeta } from '../stores/app'
+import { errorMessage } from '../utils/format'
+
+const loading = ref(false)
+const error = ref('')
+const data = ref({ cards: [], trends: [], top_departments: [] })
+const drillDepartment = computed(() => appState.meta.departments.find((item) => item.dept_code === filters.dept_code))
+let requestId = 0
+
+async function fetchDashboard() {
+  const currentRequest = ++requestId
+  loading.value = true
+  error.value = ''
+  try {
+    const result = await request('/dashboards/management', { query: filterParams() })
+    if (currentRequest !== requestId) return
+    data.value = {
+      cards: Array.isArray(result?.cards) ? result.cards : [],
+      trends: Array.isArray(result?.trends) ? result.trends : [],
+      top_departments: Array.isArray(result?.top_departments) ? result.top_departments : [],
+    }
+  } catch (err) {
+    if (currentRequest === requestId) error.value = errorMessage(err)
+  } finally {
+    if (currentRequest === requestId) loading.value = false
+  }
+}
+
+async function drillIntoDepartment(params) {
+  if (filters.dept_code) return
+  const department = appState.meta.departments.find((item) => item.dept_name === params.name)
+  if (!department) return
+  filters.dept_code = department.dept_code
+  await fetchDashboard()
+}
+
+async function resetDrill() {
+  filters.dept_code = ''
+  await fetchDashboard()
+}
+
+onMounted(async () => {
+  await loadMeta()
+  fetchDashboard()
+})
+</script>
+
+<template>
+  <div class="page">
+    <PageHeader title="管理驾驶舱" description="聚合核心运营指标，纵览全院医疗服务与经营态势">
+      <template #actions>
+        <button v-if="filters.dept_code" class="btn" :disabled="loading" @click="resetDrill">
+          <AppIcon name="chevronRight" :size="15" class="back-icon" />返回全院
+        </button>
+        <button class="btn" :disabled="loading" @click="fetchDashboard">
+          <AppIcon name="refresh" :size="15" />刷新数据
+        </button>
+      </template>
+    </PageHeader>
+
+    <FilterBar :loading="loading" @apply="fetchDashboard" />
+
+    <div v-if="drillDepartment" class="drill-banner">
+      <span>当前已下钻至 <strong>{{ drillDepartment.dept_name }}</strong>，可继续点击“返回全院”恢复</span>
+      <button class="btn btn-sm" @click="resetDrill">返回全院</button>
+    </div>
+
+    <div v-if="error" class="dashboard-error">
+      <AppIcon name="alert" :size="17" /><span>{{ error }}</span>
+      <button class="btn btn-sm" @click="fetchDashboard">重试</button>
+    </div>
+
+    <div v-if="data.cards.length || loading" class="metrics-grid">
+      <template v-if="loading && !data.cards.length">
+        <div v-for="index in 4" :key="index" class="card metric-skeleton">
+          <div class="skeleton" style="width: 40%; height: 13px" />
+          <div class="skeleton" style="width: 62%; height: 30px; margin-top: 20px" />
+          <div class="skeleton" style="width: 35%; height: 10px; margin-top: 17px" />
+        </div>
+      </template>
+      <MetricCard v-for="(card, index) in data.cards" v-else :key="card.key" :card="card" :index="index" />
+    </div>
+
+    <StateBlock v-if="!loading && !data.cards.length && !data.trends.length && !data.top_departments.length" />
+
+    <div v-else class="dashboard-grid">
+      <section class="card">
+        <div class="card-header">
+          <div><h2 class="card-heading">运营趋势</h2><p class="card-subheading">门诊服务量与医疗收入变化</p></div>
+          <span class="status-badge info">按日统计</span>
+        </div>
+        <div class="card-body chart-body">
+          <StateBlock v-if="!loading && !data.trends.length" compact />
+          <div v-else class="chart chart-lg">
+            <LineChart
+              :dates="data.trends.map((item) => item.date)"
+              :series="[
+                { name: '门诊人次', data: data.trends.map((item) => item.outpatient_visits), area: true },
+                { name: '医疗收入', data: data.trends.map((item) => item.revenue), yAxisIndex: 1, area: false },
+              ]"
+              :loading="loading"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div><h2 class="card-heading">科室收入排行</h2><p class="card-subheading">{{ filters.dept_code ? '当前科室运营表现' : '点击科室柱形可下钻' }}</p></div>
+          <AppIcon name="building" :size="18" class="header-icon" />
+        </div>
+        <div class="card-body chart-body">
+          <StateBlock v-if="!loading && !data.top_departments.length" compact />
+          <div v-else class="chart chart-lg">
+            <BarChart
+              :categories="data.top_departments.map((item) => item.dept_name)"
+              :values="data.top_departments.map((item) => item.revenue)"
+              name="医疗收入"
+              horizontal
+              color="#2f7cf6"
+              :loading="loading"
+              @chart-click="drillIntoDepartment"
+            />
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.dashboard-error {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+  padding: 11px 14px;
+  color: #b84848;
+  font-size: 12px;
+  background: var(--danger-soft);
+  border: 1px solid #f6dede;
+  border-radius: 8px;
+}
+
+.dashboard-error span {
+  flex: 1;
+}
+
+.metric-skeleton {
+  min-height: 147px;
+  padding: 22px 20px;
+}
+
+.chart-body {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.header-icon {
+  color: #8ca2ba;
+}
+
+.drill-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  color: #245b9e;
+  font-size: 12px;
+  background: var(--primary-soft);
+  border: 1px solid #cbdcf5;
+  border-radius: 8px;
+}
+
+.back-icon {
+  transform: rotate(180deg);
+}
+</style>

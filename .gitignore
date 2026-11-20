@@ -1,0 +1,41 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 环境变量与密钥
+.env
+.env.*
+!.env.example
+
+# 前端
+node_modules/
+frontend/dist/
+frontend/coverage/
+
+# 本地数仓、上传文件与备份
+data/derived/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.bak
+
+# 演示文稿编辑缓存
+docs/答辩材料/.slidep/
+
+# 日志与临时文件
+*.log
+*.tmp
+*.temp
+
+# 编辑器与操作系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

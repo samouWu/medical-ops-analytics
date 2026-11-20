@@ -1,0 +1,10 @@
+﻿fee_type_code,fee_type_name,category
+XY,西药费,药品
+ZC,中成药费,药品
+JC,检查费,检查
+JY,检验费,检验
+ZL,治疗费,治疗
+SS,手术费,手术
+CL,材料费,耗材
+CW,床位费,床位
+HL,护理费,护理

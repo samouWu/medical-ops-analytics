@@ -1,0 +1,38 @@
+name: medical-ops-analytics
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    environment:
+      MEDICAL_DB_PATH: /app/data/derived/medical_ops.db
+      MEDICAL_SECRET_KEY: ${MEDICAL_SECRET_KEY:-dev-only-change-me}
+      MEDICAL_TOKEN_MINUTES: ${MEDICAL_TOKEN_MINUTES:-480}
+      MEDICAL_HASH_SALT: ${MEDICAL_HASH_SALT:-local-course-project}
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      KIMI_API_KEY: ${KIMI_API_KEY:-}
+      KIMI_BASE_URL: ${KIMI_BASE_URL:-https://api.moonshot.cn/v1}
+      KIMI_MODEL: ${KIMI_MODEL:-moonshot-v1-8k}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+    ports:
+      - "8765:8765"
+    volumes:
+      - medical_data:/app/data/derived
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  medical_data:

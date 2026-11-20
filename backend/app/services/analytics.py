@@ -1,0 +1,256 @@
+from datetime import date, timedelta
+
+from app.core.database import db_session
+from app.services.metrics import METRIC_MAP, safe_ratio
+
+
+def date_range(conn):
+    row = conn.execute("SELECT MIN(stat_date),MAX(stat_date) FROM dws_dept_day").fetchone()
+    return {"min": row[0], "max": row[1]}
+
+
+def normalize_period(conn, start=None, end=None):
+    available = date_range(conn)
+    if not available["min"]:
+        today = date.today().isoformat()
+        return today, today
+    start = start or available["min"]
+    end = end or available["max"]
+    date.fromisoformat(start)
+    date.fromisoformat(end)
+    if start > end:
+        raise ValueError("开始日期不能晚于结束日期")
+    return start, end
+
+
+def scope(user, dept_code, column="dept_code"):
+    allowed = user.get("dept_codes") or []
+    if dept_code:
+        if allowed and dept_code not in allowed:
+            raise PermissionError("无权访问该科室数据")
+        return f"{column}=?", [dept_code]
+    if allowed:
+        return f"{column} IN ({','.join('?' for _ in allowed)})", list(allowed)
+    return "1=1", []
+
+
+def card(key, value, unit="", fmt="number"):
+    return {"key": key, "label": METRIC_MAP.get(key, {}).get("name", key), "value": value, "unit": unit or METRIC_MAP.get(key, {}).get("unit", ""), "format": fmt}
+
+
+def metric_summary(code, start, end, user, dept_code=None, conn=None):
+    owns = conn is None
+    conn = conn or db_session().__enter__()
+    try:
+        start, end = normalize_period(conn, start, end)
+        where, params = scope(user, dept_code)
+        aggregate = "SELECT SUM(outpatient_visits),SUM(outpatient_patients),SUM(outpatient_revenue),SUM(admissions),SUM(discharges),SUM(inpatient_revenue),SUM(drug_revenue),SUM(consumable_revenue),SUM(total_revenue),SUM(stay_days),SUM(occupied_bed_days),SUM(open_bed_days),SUM(lis_reports),SUM(abnormal_lis_reports) FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? AND " + where
+        a = conn.execute(aggregate, [start, end, *params]).fetchone()
+        a = [x or 0 for x in a]
+        values = {
+            "K01": a[0], "K07": a[3], "K08": a[4], "K10": a[10], "K11": a[11],
+            "K16": a[8], "K17": a[2], "K18": a[5], "K21": a[6], "K23": a[7],
+            "K12": safe_ratio(a[10], a[11], 100), "K13": safe_ratio(a[9], a[4]),
+            "K14": safe_ratio(a[4]*((date.fromisoformat(end)-date.fromisoformat(start)).days+1), a[11]), "K19": safe_ratio(a[2], a[0]),
+            "K20": safe_ratio(a[5], a[4]), "K22": safe_ratio(a[6], a[8], 100),
+            "K24": safe_ratio(a[7], a[8], 100), "K39": safe_ratio(a[13], a[12], 100),
+        }
+        if code in ("K02", "K06", "K37"):
+            sql = "SELECT COUNT(*),COUNT(DISTINCT patient_key) FROM dwd_outpatient_visit WHERE visit_date BETWEEN ? AND ? AND " + where
+            total, patients = conn.execute(sql, [start, end, *params]).fetchone()
+            values["K02"] = patients
+            values["K06"] = safe_ratio((total or 0)-(patients or 0), total, 100)
+            values["K37"] = safe_ratio(total, patients)
+        elif code == "K38":
+            sql = "SELECT COUNT(*),COUNT(DISTINCT patient_key) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND " + where
+            total, patients = conn.execute(sql, [start, end, *params]).fetchone()
+            values[code] = safe_ratio(total, patients)
+        elif code == "K09":
+            sql = "SELECT COUNT(DISTINCT patient_key) FROM dwd_inpatient_stay WHERE admit_date<=? AND discharge_date>? AND " + where
+            values[code] = conn.execute(sql, [end, end, *params]).fetchone()[0]
+        elif code in ("K26", "K27"):
+            sql = "SELECT COUNT(*),SUM(disease_code IS NOT NULL AND disease_code!=''),SUM(total_fee) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND " + where
+            count, grouped, fees = conn.execute(sql, [start, end, *params]).fetchone()
+            values["K26"] = safe_ratio(grouped or 0, count, 100)
+            if code == "K27" and count:
+                selected = conn.execute("SELECT disease_code,COUNT(*) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND disease_code IS NOT NULL AND " + where + " GROUP BY disease_code", [start, end, *params]).fetchall()
+                overall = conn.execute("SELECT AVG(total_fee) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ?", [start, end]).fetchone()[0]
+                weighted = total_cases = 0
+                for disease_code, n in selected:
+                    benchmark = conn.execute("SELECT AVG(total_fee) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND disease_code=?", [start, end, disease_code]).fetchone()[0]
+                    weighted += (benchmark or 0) / overall * n if overall else 0
+                    total_cases += n
+                values[code] = safe_ratio(weighted, total_cases)
+        elif code in ("K28", "K29"):
+            selected_where, selected_params = scope(user, dept_code)
+            selected = conn.execute("SELECT disease_code,COUNT(*),SUM(total_fee),SUM(stay_days) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND disease_code IS NOT NULL AND " + selected_where + " GROUP BY disease_code", [start, end, *selected_params]).fetchall()
+            actual_fee = expected_fee = actual_days = expected_days = 0
+            for disease_code, n, fees, days in selected:
+                benchmark = conn.execute("SELECT AVG(total_fee),AVG(stay_days) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND disease_code=?", [start, end, disease_code]).fetchone()
+                actual_fee += fees or 0
+                expected_fee += (benchmark[0] or 0)*n
+                actual_days += days or 0
+                expected_days += (benchmark[1] or 0)*n
+            values["K28"] = safe_ratio(actual_fee, expected_fee)
+            values["K29"] = safe_ratio(actual_days, expected_days)
+        elif code in ("K31", "K32"):
+            if dept_code:
+                staff = conn.execute("SELECT staff_count FROM dim_department WHERE dept_code=?", (dept_code,)).fetchone()[0]
+            elif user.get("dept_codes"):
+                staff = conn.execute(f"SELECT SUM(staff_count) FROM dim_department WHERE dept_code IN ({','.join('?' for _ in user['dept_codes'])})", user["dept_codes"]).fetchone()[0]
+            else:
+                staff = conn.execute("SELECT SUM(staff_count) FROM dim_department").fetchone()[0]
+            values["K31"] = safe_ratio(a[0], staff)
+            values["K32"] = safe_ratio(a[8], staff)
+        elif code == "K25":
+            previous_start = date.fromisoformat(start).replace(year=date.fromisoformat(start).year-1).isoformat()
+            previous_end = date.fromisoformat(end).replace(year=date.fromisoformat(end).year-1).isoformat()
+            previous = metric_summary("K16", previous_start, previous_end, user, dept_code, conn)
+            values[code] = safe_ratio(a[8]-(previous or 0), previous, 100) if previous is not None else None
+        return values.get(code)
+    finally:
+        if owns:
+            conn.close()
+
+
+def metric_values(code, start, end, user, dept_code=None, grain="day"):
+    if code not in METRIC_MAP or not METRIC_MAP[code]["supported"]:
+        raise ValueError("该指标缺少源数据，暂不可计算")
+    if grain not in ("day", "week", "month"):
+        raise ValueError("粒度仅支持day、week或month")
+    with db_session() as conn:
+        start, end = normalize_period(conn, start, end)
+        if grain in ("week", "month") or code in ("K09", "K25", "K26", "K27", "K28", "K29", "K31", "K32"):
+            days = [date.fromisoformat(row[0]) for row in conn.execute("SELECT DISTINCT stat_date FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? ORDER BY 1", (start, end))]
+            if not days:
+                return []
+            starts = set()
+            for day in days:
+                if grain == "week":
+                    starts.add(day-timedelta(days=day.weekday()))
+                elif grain == "month":
+                    starts.add(day.replace(day=1))
+                else:
+                    starts.add(day)
+            points = []
+            for period_start in sorted(starts):
+                if grain == "week":
+                    p_end = min(end, (period_start+timedelta(days=6)).isoformat())
+                    label = period_start.isoformat()
+                elif grain == "month":
+                    p_end = min(end, ((period_start+timedelta(days=32)).replace(day=1)-timedelta(days=1)).isoformat())
+                    label = period_start.strftime("%Y-%m")
+                else:
+                    p_end = min(end, period_start.isoformat())
+                    label = period_start.isoformat()
+                p_start = max(start, period_start.isoformat())
+                points.append({"date": label, "value": metric_summary(code, p_start, p_end, user, dept_code, conn)})
+            return points
+        expressions = {
+            "K01": "SUM(outpatient_visits)", "K02": "SUM(outpatient_patients)", "K07": "SUM(admissions)",
+            "K08": "SUM(discharges)", "K10": "SUM(occupied_bed_days)", "K11": "SUM(open_bed_days)",
+            "K16": "SUM(total_revenue)", "K17": "SUM(outpatient_revenue)", "K18": "SUM(inpatient_revenue)",
+            "K21": "SUM(drug_revenue)", "K23": "SUM(consumable_revenue)",
+            "K12": "SUM(occupied_bed_days)*100.0/NULLIF(SUM(open_bed_days),0)",
+            "K13": "SUM(stay_days)/NULLIF(SUM(discharges),0)", "K14": "SUM(discharges)/NULLIF(SUM(open_bed_days),0)",
+            "K19": "SUM(outpatient_revenue)/NULLIF(SUM(outpatient_visits),0)",
+            "K20": "SUM(inpatient_revenue)/NULLIF(SUM(discharges),0)",
+            "K22": "SUM(drug_revenue)*100.0/NULLIF(SUM(total_revenue),0)",
+            "K24": "SUM(consumable_revenue)*100.0/NULLIF(SUM(total_revenue),0)",
+            "K39": "SUM(abnormal_lis_reports)*100.0/NULLIF(SUM(lis_reports),0)",
+        }
+        if code == "K02":
+            where, params = scope(user, dept_code)
+            rows = conn.execute("SELECT visit_date,COUNT(DISTINCT patient_key) FROM dwd_outpatient_visit WHERE visit_date BETWEEN ? AND ? AND "+where+" GROUP BY visit_date ORDER BY 1", [start, end, *params])
+        elif code == "K06":
+            where, params = scope(user, dept_code)
+            rows = conn.execute("SELECT visit_date,(COUNT(*)-COUNT(DISTINCT patient_key))*100.0/COUNT(*) FROM dwd_outpatient_visit WHERE visit_date BETWEEN ? AND ? AND "+where+" GROUP BY visit_date ORDER BY 1", [start, end, *params])
+        elif code == "K37":
+            where, params = scope(user, dept_code)
+            rows = conn.execute("SELECT visit_date,COUNT(*)*1.0/NULLIF(COUNT(DISTINCT patient_key),0) FROM dwd_outpatient_visit WHERE visit_date BETWEEN ? AND ? AND "+where+" GROUP BY visit_date ORDER BY 1", [start, end, *params])
+        elif code == "K38":
+            where, params = scope(user, dept_code)
+            rows = conn.execute("SELECT discharge_date,COUNT(*)*1.0/NULLIF(COUNT(DISTINCT patient_key),0) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND "+where+" GROUP BY discharge_date ORDER BY 1", [start, end, *params])
+        else:
+            expression = expressions.get(code)
+            if not expression:
+                return [{"date": end, "value": metric_summary(code, start, end, user, dept_code, conn)}]
+            where, params = scope(user, dept_code)
+            rows = conn.execute(f"SELECT stat_date,{expression} FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? AND {where} GROUP BY stat_date ORDER BY 1", [start, end, *params])
+        return [{"date": row[0], "value": round(row[1], 4) if row[1] is not None else None} for row in rows]
+
+
+def management(start, end, user, dept_code=None):
+    with db_session() as conn:
+        start, end = normalize_period(conn, start, end)
+        cards = [card(code, metric_summary(code, start, end, user, dept_code, conn), fmt="currency" if code == "K16" else "percent" if code in ("K12", "K22") else "number") for code in ("K01", "K08", "K16", "K12", "K22")]
+        where, params = scope(user, dept_code)
+        trends = [dict(date=r[0], outpatient_visits=r[1], revenue=r[2]) for r in conn.execute("SELECT stat_date,SUM(outpatient_visits),SUM(total_revenue) FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? AND "+where+" GROUP BY 1 ORDER BY 1", [start, end, *params])]
+        top = [dict(dept_name=r[1], revenue=r[2]) for r in conn.execute("SELECT d.dept_code,d.dept_name,SUM(s.total_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1,2 ORDER BY 3 DESC LIMIT 5", [start, end, *params])]
+        return {"cards": cards, "trends": trends, "top_departments": top, "period": {"start": start, "end": end}}
+
+
+def analytics(topic, start, end, user, dept_code=None):
+    topics = {"outpatient", "inpatient", "revenue", "drugs", "consumables", "disease", "resources", "service"}
+    if topic not in topics:
+        raise ValueError("未知分析主题")
+    with db_session() as conn:
+        start, end = normalize_period(conn, start, end)
+        where, params = scope(user, dept_code)
+        if topic in ("outpatient", "inpatient", "revenue"):
+            codes = {"outpatient": ("K01", "K37", "K19", "K06", "K02"), "inpatient": ("K08", "K38", "K13", "K12", "K20"), "revenue": ("K16", "K17", "K18", "K22", "K24")}[topic]
+        elif topic == "drugs": codes = ("K21", "K22", "K16")
+        elif topic == "consumables": codes = ("K23", "K24", "K16")
+        elif topic == "disease": codes = ("K26", "K27", "K28", "K29")
+        else: codes = ("K12", "K14", "K31", "K32")
+        cards = [card(code, metric_summary(code, start, end, user, dept_code, conn), fmt="currency" if code in ("K16", "K17", "K18", "K19", "K20", "K21", "K23", "K32") else "percent" if code in ("K06", "K12", "K22", "K24", "K26") else "decimal" if code in ("K13", "K14", "K27", "K28", "K29", "K31") else "number") for code in codes]
+        if topic == "outpatient":
+            cards.insert(1, {"key": "daily_avg", "label": "日均门诊", "value": round((cards[0]["value"] or 0)/max((date.fromisoformat(end)-date.fromisoformat(start)).days+1, 1), 2), "unit": "人次", "format": "decimal"})
+            emergency = conn.execute("SELECT COUNT(*) FROM dwd_outpatient_visit WHERE visit_type='急诊' AND visit_date BETWEEN ? AND ? AND "+where, [start, end, *params]).fetchone()[0]
+            cards.append({"key": "emergency_ratio", "label": "急诊占比", "value": safe_ratio(emergency, cards[0]["value"], 100), "unit": "%", "format": "percent"})
+            trend_code, dist_code = "K01", "outpatient_visits"
+        elif topic == "inpatient": trend_code, dist_code = "K08", "discharges"
+        elif topic == "revenue": trend_code, dist_code = "K16", "total_revenue"
+        elif topic == "drugs": trend_code, dist_code = "K21", "drug_revenue"
+        elif topic == "consumables": trend_code, dist_code = "K23", "consumable_revenue"
+        else: trend_code, dist_code = "K08", "discharges"
+        trends = metric_values(trend_code, start, end, user, dept_code)
+        distribution = []
+        table = {"columns": [], "rows": []}
+        chart_type = "line"
+        if topic == "revenue":
+            distribution = [{"name": "门诊收入", "value": cards[1]["value"]}, {"name": "住院收入", "value": cards[2]["value"]}]
+            fee_rows = conn.execute("SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params])
+            table = {"columns": [{"key": "name", "label": "费用类别"}, {"key": "value", "label": "金额（元）"}], "rows": [{"name": r[0], "value": round(r[1], 2)} for r in fee_rows]}
+            chart_type = "bar"
+        elif topic in ("drugs", "consumables"):
+            codes_filter = ("XY", "ZC") if topic == "drugs" else ("CL",)
+            rows = conn.execute(f"SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND fee_type_code IN ({','.join('?' for _ in codes_filter)}) AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *codes_filter, *params])
+            distribution = [{"name": r[0], "value": r[1]} for r in rows]
+        elif topic == "disease":
+            disease_where = where
+            rows = conn.execute("SELECT i.disease_code,d.disease_name,COUNT(*) n,AVG(i.total_fee),AVG(i.stay_days) FROM dwd_inpatient_stay i JOIN dim_disease d USING(disease_code) WHERE i.discharge_date BETWEEN ? AND ? AND "+disease_where.replace("dept_code", "i.dept_code")+" GROUP BY 1,2 ORDER BY n DESC", [start, end, *params])
+            distribution = [{"name": r[1], "value": r[2], "avg_fee": round(r[3], 2), "avg_days": round(r[4], 2)} for r in rows]
+            table = {"columns": [{"key": "name", "label": "病种"}, {"key": "value", "label": "出院人次"}, {"key": "avg_fee", "label": "次均费用（元）"}, {"key": "avg_days", "label": "平均住院日"}], "rows": distribution}
+            trends = []
+            chart_type = "bar"
+        elif topic == "resources":
+            rows = conn.execute("SELECT d.dept_code,d.dept_name,d.bed_count,d.staff_count,SUM(s.outpatient_visits),SUM(s.discharges),SUM(s.occupied_bed_days),SUM(s.open_bed_days),SUM(s.total_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1,2,3,4 ORDER BY 8 DESC", [start, end, *params])
+            distribution = [{"name": r[1], "value": safe_ratio(r[6], r[7], 100)} for r in rows]
+            table = {"columns": [{"key": "name", "label": "科室"}, {"key": "beds", "label": "教学配置床位"}, {"key": "usage", "label": "床位使用率"}, {"key": "turnover", "label": "床位周转次数"}, {"key": "staff", "label": "教学配置人力"}], "rows": [{"name": r[1], "beds": r[2], "staff": r[3], "usage": safe_ratio(r[6], r[7], 100), "turnover": safe_ratio(r[5]*((date.fromisoformat(end)-date.fromisoformat(start)).days+1), r[7]), "revenue": r[8]} for r in rows]}
+            trends = []
+            chart_type = "bar"
+        elif topic == "service":
+            service = conn.execute("SELECT SUM(lis_reports),SUM(abnormal_lis_reports) FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? AND "+where, [start, end, *params]).fetchone()
+            cards = [{"key": "lis", "label": "检验报告数", "value": service[0] or 0, "unit": "份", "format": "number"}, card("K39", metric_summary("K39", start, end, user, dept_code, conn), fmt="percent")]
+            service_where, service_params = scope(user, dept_code, "COALESCE(o.dept_code,i.dept_code)")
+            rows = conn.execute("SELECT l.item_name,COUNT(*),SUM(l.result_text IN ('异常','阳性')) FROM dwd_lis_report l LEFT JOIN dwd_outpatient_visit o ON l.visit_id=o.visit_id LEFT JOIN dwd_inpatient_stay i ON l.visit_id=i.visit_id WHERE l.report_date BETWEEN ? AND ? AND "+service_where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *service_params])
+            distribution = [{"name": r[0], "value": r[1], "abnormal": r[2]} for r in rows]
+            table = {"columns": [{"key": "name", "label": "检验项目"}, {"key": "value", "label": "报告数"}, {"key": "abnormal", "label": "异常/阳性数"}], "rows": distribution}
+            trends = []
+            chart_type = "bar"
+        else:
+            rows = conn.execute("SELECT d.dept_name,SUM(s."+dist_code+") FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params])
+            distribution = [{"name": r[0], "value": r[1]} for r in rows]
+            table = {"columns": [{"key": "name", "label": "科室"}, {"key": "value", "label": cards[0]["label"]}], "rows": distribution}
+        return {"cards": cards, "trends": trends, "distribution": distribution, "table": table, "chart_type": chart_type, "period": {"start": start, "end": end}}

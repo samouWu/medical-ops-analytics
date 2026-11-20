@@ -1,0 +1,11 @@
+﻿rule_code,rule_name,severity,check_sql,pass_condition,disposition
+OP_NOT_NULL,门诊关键字段完整性,HIGH,"SELECT COUNT(*),SUM(visit_id IS NULL OR patient_key IS NULL OR dept_code IS NULL OR visit_date IS NULL) FROM dwd_outpatient_visit",failed_rows = 0,隔离异常行并通知数据责任人
+OP_UNIQUE,门诊业务主键唯一性,HIGH,"SELECT COUNT(*),COUNT(*)-COUNT(DISTINCT visit_id) FROM dwd_outpatient_visit",failed_rows = 0,隔离异常行并通知数据责任人
+IP_DATE,住院日期逻辑,MEDIUM,"SELECT COUNT(*),SUM(discharge_date<admit_date OR stay_days<0) FROM dwd_inpatient_stay",failed_rows = 0,隔离异常行并通知数据责任人
+IP_UNIQUE,住院业务主键唯一性,HIGH,"SELECT COUNT(*),COUNT(*)-COUNT(DISTINCT visit_id) FROM dwd_inpatient_stay",failed_rows = 0,隔离异常行并通知数据责任人
+CHARGE_AMOUNT,收费金额值域,MEDIUM,"SELECT COUNT(*),SUM(amount<0) FROM dwd_charge_detail",failed_rows = 0,隔离异常行并通知数据责任人
+CHARGE_UNIQUE,收费业务主键唯一性,HIGH,"SELECT COUNT(*),COUNT(*)-COUNT(DISTINCT charge_id) FROM dwd_charge_detail",failed_rows = 0,隔离异常行并通知数据责任人
+DEPT_MAPPING,科室字典映射,MEDIUM,"SELECT COUNT(*),SUM(d.dept_code IS NULL) FROM dwd_charge_detail c LEFT JOIN dim_department d USING(dept_code)",failed_rows = 0,隔离异常行并通知数据责任人
+DISEASE_MAPPING,病种字典映射,MEDIUM,"SELECT COUNT(*),SUM(d.disease_code IS NULL) FROM dwd_inpatient_stay i LEFT JOIN dim_disease d USING(disease_code)",failed_rows = 0,隔离异常行并通知数据责任人
+LIS_RESULT,检验结果值域,MEDIUM,"SELECT COUNT(*),SUM(result_text NOT IN ('正常','异常','偏高','偏低','阴性','阳性','未见异常','在参考范围内')) FROM dwd_lis_report",failed_rows = 0,隔离异常行并通知数据责任人
+FINANCE_NONNEGATIVE,财务金额非负,MEDIUM,"SELECT COUNT(*),SUM(revenue<0 OR drug_revenue<0 OR consumable_revenue<0) FROM dwd_finance_day",failed_rows = 0,隔离异常行并通知数据责任人

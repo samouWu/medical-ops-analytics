@@ -1,0 +1,67 @@
+<Slide style={{ width: 1280, height: 720, background: '#FFFFFF', padding: 60 }}>
+  <Box style={{ width: '100%', height: 8, background: '#1E4FA8', position: 'absolute', top: 0, left: 0 }} />
+  <Box style={{ flexDirection: 'column', gap: 8, height: 112 }}>
+    <Text style={{ fontSize: 18, color: '#1E4FA8', fontWeight: 'bold', letterSpacing: 1 }}>06 / 应用演示</Text>
+    <Text style={{ fontSize: 38, fontWeight: 'bold', color: '#0E3F8C' }}>从看板到下钻、同环比</Text>
+    <Text style={{ fontSize: 20, color: '#4A5568' }}>现场按五步演示，重点证明筛选、下钻、粒度和导出不是静态页面。</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 10, height: 130, marginTop: 16 }}>
+    <Box style={{ flex: 1, background: '#E8EFF8', borderRadius: 8, padding: 14 }}>
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1E4FA8' }}>01</Text>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1A2230' }}>驾驶舱</Text>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>5个核心指标、趋势与收入排行</Text>
+    </Box>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14 }}>
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1E4FA8' }}>02</Text>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1A2230' }}>科室下钻</Text>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>点击柱形，绑定科室，返回全院</Text>
+    </Box>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14 }}>
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1E4FA8' }}>03</Text>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1A2230' }}>主题分析</Text>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>指标卡、趋势、构成和明细</Text>
+    </Box>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14 }}>
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1E4FA8' }}>04</Text>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1A2230' }}>多维报表</Text>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>日期×科室、同比/环比、Excel</Text>
+    </Box>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14 }}>
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1E4FA8' }}>05</Text>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1A2230' }}>智能问数</Text>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>问题→指标→科室→时间→图表</Text>
+    </Box>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 18, height: 250, marginTop: 16 }}>
+    <Box style={{ width: 565, background: '#F0F5FC', border: '1px solid #C9DCF5', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 25, fontWeight: 'bold', color: '#0E3F8C' }}>现场演示顺序</Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.55 }}>
+        登录 → 管理驾驶舱 → 点击“呼吸内科”柱形 → 返回全院 → 门诊分析 → 指标查询切“按周” → 多维报表选 K01/K16 → 勾选同比/环比 → 生成并导出。
+      </Text>
+      <Box style={{ background: '#FFFFFF', borderRadius: 6, padding: 10, marginTop: 10 }}>
+        <Text style={{ fontSize: 17, color: '#1E4FA8' }}>预期：周趋势14个点；多维30行；对比列生成；下载XLSX。</Text>
+      </Box>
+    </Box>
+    <Box style={{ width: 577, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 25, fontWeight: 'bold', color: '#0E3F8C' }}>受控问数的答辩口径</Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.55 }}>
+        问题是“2025年5月呼吸科门诊量是多少？”系统识别K01、HN、2025-05，调用统一指标服务，返回9,000口径下的科室结果。
+      </Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.55 }}>
+        外部模型只生成80字内解读；没有Key或失败时返回local-rules-fallback。它不生成SQL，也不接触患者明细。
+      </Text>
+    </Box>
+  </Box>
+
+  <Box style={{ height: 64, marginTop: 14, background: '#0E3F8C', borderRadius: 8, padding: '14px 20px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 21, color: '#FFFFFF' }}>演示讲的是“可验证的操作链路”，不是页面截图。</Text>
+    <Text style={{ fontSize: 19, color: '#FFC107' }}>真实 API · 真实数据 · 可复算</Text>
+  </Box>
+
+  <Box style={{ position: 'absolute', left: 60, right: 60, top: 674, flexDirection: 'row', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 14, color: '#8B97A8' }}>医疗运营数据主题分析平台</Text>
+    <Text style={{ fontSize: 14, color: '#1E4FA8' }}>07 / 10</Text>
+  </Box>
+</Slide>

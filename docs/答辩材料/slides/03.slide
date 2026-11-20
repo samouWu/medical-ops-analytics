@@ -1,0 +1,59 @@
+<Slide style={{ width: 1280, height: 720, background: '#FFFFFF', padding: 60 }}>
+  <Box style={{ width: '100%', height: 8, background: '#1E4FA8', position: 'absolute', top: 0, left: 0 }} />
+  <Box style={{ flexDirection: 'column', gap: 8, height: 112 }}>
+    <Text style={{ fontSize: 18, color: '#1E4FA8', fontWeight: 'bold', letterSpacing: 1 }}>02 / 总体架构</Text>
+    <Text style={{ fontSize: 38, fontWeight: 'bold', color: '#0E3F8C' }}>一套可运行的分层数据链路</Text>
+    <Text style={{ fontSize: 20, color: '#4A5568' }}>Vue 3 前端、FastAPI 服务、SQLite 数仓；DeepSeek/Kimi 只做聚合解读。</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 24, height: 480, marginTop: 16 }}>
+    <Box style={{ width: 700, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: 20, flexDirection: 'column', gap: 6 }}>
+      <Box style={{ height: 52, background: '#E8EFF8', borderRadius: 7, padding: '8px 16px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#0E3F8C' }}>Vue 3 + ECharts</Text>
+        <Text style={{ fontSize: 17, color: '#4A5568' }}>驾驶舱 / 8主题 / 多维 / 问数 / 治理</Text>
+      </Box>
+      <Text style={{ fontSize: 18, color: '#1E4FA8', textAlign: 'center' }}>↓　JWT + Trace ID + 统一响应</Text>
+      <Box style={{ height: 58, background: '#1E4FA8', borderRadius: 7, padding: '9px 16px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#FFFFFF' }}>FastAPI /api/v1</Text>
+        <Text style={{ fontSize: 16, color: '#D7E4F8' }}>认证 · 指标 · 报表 · AI · 治理</Text>
+      </Box>
+      <Text style={{ fontSize: 18, color: '#1E4FA8', textAlign: 'center' }}>↓　参数化查询 / 科室范围</Text>
+      <Box style={{ height: 58, background: '#F0F5FC', border: '1px solid #C9DCF5', borderRadius: 7, padding: '9px 16px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#0E3F8C' }}>ADS 日 / 周 / 月</Text>
+        <Text style={{ fontSize: 16, color: '#4A5568' }}>22项核心 · 26,136行 · 可回刷</Text>
+      </Box>
+      <Box style={{ height: 58, background: '#F0F5FC', border: '1px solid #C9DCF5', borderRadius: 7, padding: '9px 16px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#0E3F8C' }}>DWS 八主题集市</Text>
+        <Text style={{ fontSize: 16, color: '#4A5568' }}>门诊 · 住院 · 收入 · 药品 · 耗材 · 病种 · 资源 · 服务</Text>
+      </Box>
+      <Box style={{ height: 58, background: '#F0F5FC', border: '1px solid #C9DCF5', borderRadius: 7, padding: '9px 16px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#0E3F8C' }}>DWD 六张明细</Text>
+        <Text style={{ fontSize: 16, color: '#4A5568' }}>标准化 · 业务主键 · patient_key 散列</Text>
+      </Box>
+      <Box style={{ height: 52, background: '#E8EFF8', borderRadius: 7, padding: '8px 16px', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#0E3F8C' }}>ODS + 六源文件</Text>
+        <Text style={{ fontSize: 16, color: '#4A5568' }}>原始留痕 · 批次 · SHA-256</Text>
+      </Box>
+    </Box>
+
+    <Box style={{ width: 436, flexDirection: 'column', gap: 14 }}>
+      <Box style={{ height: 142, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1A2230' }}>为什么选 SQLite</Text>
+        <Text style={{ fontSize: 19, color: '#4A5568', lineHeight: 1.45 }}>零安装、单文件、便于课程复现；明确标注不是生产 MPP，也未在 PostgreSQL 验证。</Text>
+      </Box>
+      <Box style={{ height: 142, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1A2230' }}>为什么是主题 DWS</Text>
+        <Text style={{ fontSize: 19, color: '#4A5568', lineHeight: 1.45 }}>八个业务主题各有物理表，避免页面直接扫明细，同时保留公共科室日汇总做统一口径。</Text>
+      </Box>
+      <Box style={{ height: 130, background: '#FFF8E1', border: '1px solid #FFE082', borderRadius: 9, padding: 18 }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#7A4F00' }}>模型接入边界</Text>
+        <Text style={{ fontSize: 19, color: '#5D4037', lineHeight: 1.45 }}>默认 DeepSeek，可切 Kimi；Key 只在服务端；失败回退本地规则，不接 GPT。</Text>
+      </Box>
+    </Box>
+  </Box>
+
+  <Box style={{ position: 'absolute', left: 60, right: 60, top: 674, flexDirection: 'row', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 14, color: '#8B97A8' }}>医疗运营数据主题分析平台</Text>
+    <Text style={{ fontSize: 14, color: '#1E4FA8' }}>03 / 10</Text>
+  </Box>
+</Slide>

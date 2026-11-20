@@ -1,0 +1,25 @@
+<Slide style={{ width: 1280, height: 720, background: '#0E3F8C', padding: 60, flexDirection: 'column', justifyContent: 'space-between' }}>
+  <Box style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Text style={{ fontSize: 16, color: '#C9DCF5', letterSpacing: 2 }}>COURSE PROJECT · DATA ENGINEERING</Text>
+    <Text style={{ fontSize: 16, color: '#C9DCF5' }}>V1.1 / 2026-11-20</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'column', gap: 22 }}>
+    <Box style={{ width: 72, height: 6, background: '#FFC107', borderRadius: 3 }} />
+    <Text style={{ fontSize: 28, color: '#BBD0EE' }}>医疗运营数据主题分析平台</Text>
+    <Text style={{ fontSize: 68, fontWeight: 'bold', color: '#FFFFFF', lineHeight: 1.2 }}>
+      从多源数据到<br />可信运营指标
+    </Text>
+    <Text style={{ fontSize: 24, color: '#D7E4F8', lineHeight: 1.5 }}>
+      六源 ETL · 八主题 DWS · 日周月 ADS · 受控智能问数
+    </Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.28)', paddingTop: 18 }}>
+    <Box style={{ flexDirection: 'column', gap: 8 }}>
+      <Text style={{ fontSize: 20, color: '#FFFFFF', fontWeight: 'bold' }}>课程项目答辩</Text>
+      <Text style={{ fontSize: 15, color: '#BBD0EE' }}>FastAPI · Vue 3 · ECharts · SQLite · DeepSeek / Kimi</Text>
+    </Box>
+    <Text style={{ fontSize: 15, color: '#BBD0EE' }}>汇报人：待填写</Text>
+  </Box>
+</Slide>

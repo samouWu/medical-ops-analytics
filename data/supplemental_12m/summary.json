@@ -1,0 +1,254 @@
+{
+  "dataset": {
+    "seed": 20261120,
+    "generated_at": "2026-11-20",
+    "range": {
+      "start": "2025-04-01",
+      "end": "2026-03-31",
+      "months": 12
+    },
+    "real_data_range": {
+      "start": "2025-04-01",
+      "end": "2025-06-30"
+    },
+    "simulated_extension_range": {
+      "start": "2025-07-01",
+      "end": "2026-03-31"
+    },
+    "note": "前3个月为课程给定数据，后9个月为基于原模板的确定性模拟扩展；不得当作真实医院数据。",
+    "files": {
+      "his_outpatient": {
+        "path": "mock_his\\his_outpatient.csv",
+        "rows": 35017,
+        "generated_extension_rows": 26017,
+        "sha256": "a8cf6a433467cfe99b9cf4bbd1666359bee1411be64b0a3afbe7f00c0e986cbb"
+      },
+      "his_inpatient": {
+        "path": "mock_his\\his_inpatient.csv",
+        "rows": 6005,
+        "generated_extension_rows": 4505,
+        "sha256": "f3dcabdb55adbc6ef8bd4e664637ce8e14a3086dd02250d42eb417e8c8a50ce1"
+      },
+      "his_charge": {
+        "path": "mock_his\\his_charge.csv",
+        "rows": 173412,
+        "generated_extension_rows": 129334,
+        "sha256": "563eaf5a0f624fcc71653a18d614d722e557fff69d91f58c35b37b36269cd53b"
+      },
+      "emr_record": {
+        "path": "mock_his\\emr_record.csv",
+        "rows": 6005,
+        "generated_extension_rows": 4505,
+        "sha256": "e718db0f41802d21cb1134a471abd9f9680a4d6f5cb5f6f51186b5a88d04237e"
+      },
+      "lis_report": {
+        "path": "mock_his\\lis_report.csv",
+        "rows": 11939,
+        "generated_extension_rows": 9005,
+        "sha256": "5e270e0854b4901f5cf452df05e7f6c8352a5e656cca0210ecdd99324e958e70"
+      },
+      "finance_excel": {
+        "path": "files\\finance_excel.csv",
+        "rows": 3650,
+        "generated_extension_rows": 2740,
+        "sha256": "15160d573700e38391164026c89c9c799525292fc608ca12a3690a82094d6df9"
+      }
+    }
+  },
+  "etl": {
+    "sources": [
+      {
+        "batch_id": "4e4d137d4ae94a2e88682fa396a9fb5b",
+        "source_table": "his_outpatient",
+        "row_count": 35017,
+        "error_count": 0,
+        "skipped_rows": 0,
+        "incremental": false,
+        "errors": [],
+        "attempts": 1
+      },
+      {
+        "batch_id": "e0cb785c782b4485949aa24ebb386b15",
+        "source_table": "his_inpatient",
+        "row_count": 6005,
+        "error_count": 0,
+        "skipped_rows": 0,
+        "incremental": false,
+        "errors": [],
+        "attempts": 1
+      },
+      {
+        "batch_id": "33a9296e21da45aea715574bc695318f",
+        "source_table": "his_charge",
+        "row_count": 173412,
+        "error_count": 0,
+        "skipped_rows": 0,
+        "incremental": false,
+        "errors": [],
+        "attempts": 1
+      },
+      {
+        "batch_id": "f2b41b61c13f42c59f7239817a39e692",
+        "source_table": "emr_record",
+        "row_count": 6005,
+        "error_count": 0,
+        "skipped_rows": 0,
+        "incremental": false,
+        "errors": [],
+        "attempts": 1
+      },
+      {
+        "batch_id": "cc460da4a9b14b1b8a07c6caf4f2bb30",
+        "source_table": "lis_report",
+        "row_count": 11939,
+        "error_count": 0,
+        "skipped_rows": 0,
+        "incremental": false,
+        "errors": [],
+        "attempts": 1
+      },
+      {
+        "batch_id": "cea19c4c56254338a6efe9278fe61fcd",
+        "source_table": "finance_excel",
+        "row_count": 3650,
+        "error_count": 0,
+        "skipped_rows": 0,
+        "incremental": false,
+        "errors": [],
+        "attempts": 1
+      }
+    ],
+    "incremental": false,
+    "dws_rows": 3650,
+    "dwd_wide_rows": 41022,
+    "dim_date_rows": 365,
+    "theme_marts": {
+      "dws_outpatient_day": 3650,
+      "dws_inpatient_day": 3650,
+      "dws_revenue_day": 3650,
+      "dws_drug_day": 3650,
+      "dws_consumable_day": 3650,
+      "dws_disease_day": 5411,
+      "dws_resource_day": 3650,
+      "dws_service_day": 3650
+    },
+    "ads": {
+      "day": {
+        "rows": 120450,
+        "start": "2025-04-01",
+        "end": "2026-03-31"
+      },
+      "week": {
+        "rows": 17490,
+        "start": "2025-03-31",
+        "end": "2026-04-05"
+      },
+      "month": {
+        "rows": 3960,
+        "start": "2025-04-01",
+        "end": "2026-03-31"
+      }
+    }
+  },
+  "verification": {
+    "database": "E:\\创新实践\\medical-ops-analytics\\data\\supplemental_12m\\derived\\supplemental_12m.db",
+    "date_range": {
+      "start": "2025-04-01",
+      "end": "2026-03-31"
+    },
+    "month_count": 12,
+    "monthly": [
+      {
+        "month": "2025-04",
+        "days": 30,
+        "outpatient_visits": 2990,
+        "discharges": 314,
+        "revenue": 14529271.69
+      },
+      {
+        "month": "2025-05",
+        "days": 31,
+        "outpatient_visits": 3054,
+        "discharges": 511,
+        "revenue": 15289180.46
+      },
+      {
+        "month": "2025-06",
+        "days": 30,
+        "outpatient_visits": 2956,
+        "discharges": 675,
+        "revenue": 14441831.65
+      },
+      {
+        "month": "2025-07",
+        "days": 31,
+        "outpatient_visits": 2937,
+        "discharges": 366,
+        "revenue": 13827990.65
+      },
+      {
+        "month": "2025-08",
+        "days": 31,
+        "outpatient_visits": 2940,
+        "discharges": 505,
+        "revenue": 14648415.14
+      },
+      {
+        "month": "2025-09",
+        "days": 30,
+        "outpatient_visits": 2857,
+        "discharges": 498,
+        "revenue": 14354369.39
+      },
+      {
+        "month": "2025-10",
+        "days": 31,
+        "outpatient_visits": 2940,
+        "discharges": 502,
+        "revenue": 14700836.36
+      },
+      {
+        "month": "2025-11",
+        "days": 30,
+        "outpatient_visits": 2841,
+        "discharges": 485,
+        "revenue": 14205982.88
+      },
+      {
+        "month": "2025-12",
+        "days": 31,
+        "outpatient_visits": 2956,
+        "discharges": 517,
+        "revenue": 14853695.42
+      },
+      {
+        "month": "2026-01",
+        "days": 31,
+        "outpatient_visits": 2953,
+        "discharges": 510,
+        "revenue": 14670538.23
+      },
+      {
+        "month": "2026-02",
+        "days": 28,
+        "outpatient_visits": 2646,
+        "discharges": 460,
+        "revenue": 13246525.89
+      },
+      {
+        "month": "2026-03",
+        "days": 31,
+        "outpatient_visits": 2947,
+        "discharges": 662,
+        "revenue": 15521902.5
+      }
+    ],
+    "ads_grains": {
+      "day": 120450,
+      "month": 3960,
+      "week": 17490
+    },
+    "theme_rows": 3650,
+    "metric_definitions": 39
+  }
+}

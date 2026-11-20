@@ -1,0 +1,31 @@
+{
+  "generated_from": "backend/app/core/database.py + backend/app/services/metrics.py + backend/etl/quality/checks.py",
+  "note": "初始化快照，不作为独立主数据源；运行时以代码常量和数据库为准。",
+  "files": [
+    {
+      "name": "dim_department.csv",
+      "bytes": 437,
+      "sha256": "0ca6606df398ed79a358ddee0a7975d0c41dc8bd825e62a20ab4b7b3200094e7"
+    },
+    {
+      "name": "dim_disease.csv",
+      "bytes": 216,
+      "sha256": "9ffd730d6d09b70ea26c76a14d80a357e1800d57c0a4b3322241923ef101aa34"
+    },
+    {
+      "name": "dim_fee_type.csv",
+      "bytes": 233,
+      "sha256": "69fc8efe0f185b3fb486ce5474d7006cf5aa08521d5b83b22fe3fb0b2d8ecc2b"
+    },
+    {
+      "name": "metric_definition.csv",
+      "bytes": 3236,
+      "sha256": "3b39697b6754f483209e2cbc76bac09646f97dc0c2b315db8b27cda3ddfa8f0f"
+    },
+    {
+      "name": "quality_rules.csv",
+      "bytes": 2039,
+      "sha256": "2f0d720ca13149f7b3d67afd0eef35690abc3033ec75ecade853079566052507"
+    }
+  ]
+}

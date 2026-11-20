@@ -1,0 +1,56 @@
+{
+  "seed": 20261120,
+  "generated_at": "2026-11-20",
+  "range": {
+    "start": "2025-04-01",
+    "end": "2026-03-31",
+    "months": 12
+  },
+  "real_data_range": {
+    "start": "2025-04-01",
+    "end": "2025-06-30"
+  },
+  "simulated_extension_range": {
+    "start": "2025-07-01",
+    "end": "2026-03-31"
+  },
+  "note": "前3个月为课程给定数据，后9个月为基于原模板的确定性模拟扩展；不得当作真实医院数据。",
+  "files": {
+    "his_outpatient": {
+      "path": "mock_his\\his_outpatient.csv",
+      "rows": 35017,
+      "generated_extension_rows": 26017,
+      "sha256": "a8cf6a433467cfe99b9cf4bbd1666359bee1411be64b0a3afbe7f00c0e986cbb"
+    },
+    "his_inpatient": {
+      "path": "mock_his\\his_inpatient.csv",
+      "rows": 6005,
+      "generated_extension_rows": 4505,
+      "sha256": "f3dcabdb55adbc6ef8bd4e664637ce8e14a3086dd02250d42eb417e8c8a50ce1"
+    },
+    "his_charge": {
+      "path": "mock_his\\his_charge.csv",
+      "rows": 173412,
+      "generated_extension_rows": 129334,
+      "sha256": "563eaf5a0f624fcc71653a18d614d722e557fff69d91f58c35b37b36269cd53b"
+    },
+    "emr_record": {
+      "path": "mock_his\\emr_record.csv",
+      "rows": 6005,
+      "generated_extension_rows": 4505,
+      "sha256": "e718db0f41802d21cb1134a471abd9f9680a4d6f5cb5f6f51186b5a88d04237e"
+    },
+    "lis_report": {
+      "path": "mock_his\\lis_report.csv",
+      "rows": 11939,
+      "generated_extension_rows": 9005,
+      "sha256": "5e270e0854b4901f5cf452df05e7f6c8352a5e656cca0210ecdd99324e958e70"
+    },
+    "finance_excel": {
+      "path": "files\\finance_excel.csv",
+      "rows": 3650,
+      "generated_extension_rows": 2740,
+      "sha256": "15160d573700e38391164026c89c9c799525292fc608ca12a3690a82094d6df9"
+    }
+  }
+}

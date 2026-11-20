@@ -1,0 +1,73 @@
+<Slide style={{ width: 1280, height: 720, background: '#FFFFFF', padding: 60 }}>
+  <Box style={{ width: '100%', height: 8, background: '#1E4FA8', position: 'absolute', top: 0, left: 0 }} />
+  <Box style={{ flexDirection: 'column', gap: 8, height: 112 }}>
+    <Text style={{ fontSize: 18, color: '#1E4FA8', fontWeight: 'bold', letterSpacing: 1 }}>03 / 数据工程</Text>
+    <Text style={{ fontSize: 38, fontWeight: 'bold', color: '#0E3F8C' }}>六源数据进入可信数仓</Text>
+    <Text style={{ fontSize: 20, color: '#4A5568' }}>导入成功不是终点：批次、质量、脱敏和聚合一致性都要有证据。</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 16, height: 140, marginTop: 16 }}>
+    <Box style={{ width: 278, background: '#E8EFF8', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>六源导入</Text>
+      <Text style={{ fontSize: 44, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>59,922</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>行，错误 0</Text>
+    </Box>
+    <Box style={{ width: 278, background: '#E8EFF8', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>数据源类型</Text>
+      <Text style={{ fontSize: 44, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>6</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>HIS / EMR / LIS / 财务</Text>
+    </Box>
+    <Box style={{ width: 278, background: '#E8EFF8', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>质量规则</Text>
+      <Text style={{ fontSize: 44, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>10</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>当前全部 PASS</Text>
+    </Box>
+    <Box style={{ width: 278, background: '#E8EFF8', borderRadius: 9, padding: 18 }}>
+      <Text style={{ fontSize: 17, color: '#4A5568' }}>公共时间维</Text>
+      <Text style={{ fontSize: 44, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>91</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>天，包含 ISO 周</Text>
+    </Box>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 12, height: 104, marginTop: 14, alignItems: 'center' }}>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14, height: 96 }}>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1E4FA8' }}>01 接入</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568' }}>模板识别、主键、日期和数值校验</Text>
+    </Box>
+    <Text style={{ fontSize: 24, color: '#1E4FA8' }}>→</Text>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14, height: 96 }}>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1E4FA8' }}>02 留痕</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568' }}>ODS 原文、批次、SHA-256、错误行</Text>
+    </Box>
+    <Text style={{ fontSize: 24, color: '#1E4FA8' }}>→</Text>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14, height: 96 }}>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1E4FA8' }}>03 标准化</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568' }}>DWD 六表、patient_key、幂等</Text>
+    </Box>
+    <Text style={{ fontSize: 24, color: '#1E4FA8' }}>→</Text>
+    <Box style={{ flex: 1, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 8, padding: 14, height: 96 }}>
+      <Text style={{ fontSize: 21, fontWeight: 'bold', color: '#1E4FA8' }}>04 汇总</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568' }}>DWS 八主题、DIM、质量分数</Text>
+    </Box>
+  </Box>
+
+  <Box style={{ height: 144, marginTop: 14, background: '#F0F5FC', border: '1px solid #C9DCF5', borderRadius: 9, padding: 18, flexDirection: 'row', gap: 22 }}>
+    <Box style={{ width: 330, flexDirection: 'column', gap: 6 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0E3F8C' }}>隐私处理不是一句“已脱敏”</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568', lineHeight: 1.4 }}>DWD 不保留姓名、身份证、手机号，使用加盐散列；ODS 原文仍存在，必须作为敏感文件保护。</Text>
+    </Box>
+    <Box style={{ width: 340, flexDirection: 'column', gap: 6 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0E3F8C' }}>聚合一致性有自动断言</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568', lineHeight: 1.4 }}>八主题门诊、出院、收入、药品、耗材、LIS 合计分别与公共 DWS 对账，主键重复为 0。</Text>
+    </Box>
+    <Box style={{ flex: 1, flexDirection: 'column', gap: 6 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0E3F8C' }}>结论</Text>
+      <Text style={{ fontSize: 18, color: '#4A5568', lineHeight: 1.4 }}>当前数据链路可复现；源文件删除不自动同步、ODS 原文保留、无增量水位，是必须说明的边界。</Text>
+    </Box>
+  </Box>
+
+  <Box style={{ position: 'absolute', left: 60, right: 60, top: 674, flexDirection: 'row', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 14, color: '#8B97A8' }}>医疗运营数据主题分析平台</Text>
+    <Text style={{ fontSize: 14, color: '#1E4FA8' }}>04 / 10</Text>
+  </Box>
+</Slide>

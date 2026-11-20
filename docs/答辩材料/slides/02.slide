@@ -1,0 +1,46 @@
+<Slide style={{ width: 1280, height: 720, background: '#FFFFFF', padding: 60 }}>
+  <Box style={{ width: '100%', height: 8, background: '#1E4FA8', position: 'absolute', top: 0, left: 0 }} />
+  <Box style={{ flexDirection: 'column', gap: 8, height: 112 }}>
+    <Text style={{ fontSize: 18, color: '#1E4FA8', fontWeight: 'bold', letterSpacing: 1 }}>01 / 问题与目标</Text>
+    <Text style={{ fontSize: 38, fontWeight: 'bold', color: '#0E3F8C' }}>从多源数据到运营决策</Text>
+    <Text style={{ fontSize: 20, color: '#4A5568' }}>问题不是没有数据，而是数据不能直接、统一、可追溯地回答运营问题。</Text>
+  </Box>
+
+  <Box style={{ flexDirection: 'row', gap: 24, height: 388, marginTop: 16 }}>
+    <Box style={{ width: 566, background: '#F7F9FC', border: '1px solid #D6DCE5', borderRadius: 10, padding: 24, flexDirection: 'column', gap: 16 }}>
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1A2230' }}>业务侧的真实痛点</Text>
+      <Text style={{ fontSize: 21, color: '#4A5568', lineHeight: 1.5 }}>六类系统各自保存数据，同名指标分母不同，业务人员需要手工导出、拼接和复算。</Text>
+      <Box style={{ flexDirection: 'column', gap: 12 }}>
+        <Text style={{ fontSize: 20, color: '#1A2230' }}>01　门诊人次与人数混用，跨科去重困难</Text>
+        <Text style={{ fontSize: 20, color: '#1A2230' }}>02　收入、药品、耗材口径分散在不同明细</Text>
+        <Text style={{ fontSize: 20, color: '#1A2230' }}>03　缺少统一权限、审计与质量证据链</Text>
+      </Box>
+      <Box style={{ marginTop: 'auto', background: '#E8EFF8', borderRadius: 6, padding: 12 }}>
+        <Text style={{ fontSize: 18, color: '#1E4FA8' }}>结果：同一问题得到不同数字，无法解释差异。</Text>
+      </Box>
+    </Box>
+
+    <Box style={{ width: 566, background: '#F0F5FC', border: '1px solid #C9DCF5', borderRadius: 10, padding: 24, flexDirection: 'column', gap: 16 }}>
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1A2230' }}>课程项目的四项交付</Text>
+      <Text style={{ fontSize: 21, color: '#4A5568', lineHeight: 1.5 }}>不是只做看板，而是让每条数字都能回到源数据、计算逻辑和访问边界。</Text>
+      <Box style={{ flexDirection: 'column', gap: 12 }}>
+        <Text style={{ fontSize: 20, color: '#1A2230' }}>01　六源文件到四层数仓的可复现链路</Text>
+        <Text style={{ fontSize: 20, color: '#1A2230' }}>02　8 个主题集市与 30 项正式可算指标</Text>
+        <Text style={{ fontSize: 20, color: '#1A2230' }}>03　可下钻、可同环比、可导出的应用</Text>
+        <Text style={{ fontSize: 20, color: '#1A2230' }}>04　权限、审计、测试与边界说明</Text>
+      </Box>
+      <Box style={{ marginTop: 'auto', background: '#FFFFFF', borderRadius: 6, padding: 12 }}>
+        <Text style={{ fontSize: 18, color: '#1E4FA8' }}>原则：真实数据加工，不用硬编码数字代替结果。</Text>
+      </Box>
+    </Box>
+  </Box>
+
+  <Box style={{ height: 60, marginTop: 16, background: '#0E3F8C', borderRadius: 8, padding: '16px 22px', alignItems: 'center' }}>
+    <Text style={{ fontSize: 21, color: '#FFFFFF' }}>一句话：把“能看见的数字”变成“能解释、能复算、能授权的数字”。</Text>
+  </Box>
+
+  <Box style={{ position: 'absolute', left: 60, right: 60, top: 674, flexDirection: 'row', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 14, color: '#8B97A8' }}>医疗运营数据主题分析平台</Text>
+    <Text style={{ fontSize: 14, color: '#1E4FA8' }}>02 / 10</Text>
+  </Box>
+</Slide>

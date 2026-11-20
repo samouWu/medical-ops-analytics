@@ -1,0 +1,28 @@
+{
+  "name": "medical-ops-analytics-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.js",
+    "e2e": "node e2e/smoke.mjs",
+    "lint": "eslint src tests vite.config.js eslint.config.js"
+  },
+  "dependencies": {
+    "axios": "^1.21.1",
+    "echarts": "^6.1.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "eslint": "^9.22.0",
+    "eslint-plugin-vue": "^10.0.0",
+    "globals": "^16.0.0",
+    "playwright-core": "^1.65.1",
+    "vite": "^6.1.0"
+  }
+}
