@@ -55,7 +55,7 @@ const today = new Intl.DateTimeFormat('zh-CN', {
   weekday: 'short',
 }).format(new Date())
 
-const roleName = computed(() => ({ admin: '系统管理员', analyst: '数据分析师' }[user.role] || user.role || '平台用户'))
+const roleName = computed(() => ({ admin: '系统管理员', analyst: '数据分析师', department: '科室用户', engineer: '数据工程师' }[user.role] || user.role || '平台用户'))
 
 watch(() => route.fullPath, () => { mobileOpen.value = false })
 onMounted(() => loadMeta())

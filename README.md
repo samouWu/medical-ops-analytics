@@ -213,10 +213,14 @@ docker compose -f deploy/docker-compose.yml up -d
 
 ```bash
 PYTHONPATH=backend .venv/bin/python -m pytest backend/tests
-cd frontend && npm test && npm run lint && npm run build
+.venv/bin/python scripts/check_reconciliation.py
+.venv/bin/python scripts/security_check.py
+cd frontend && npm test && npm run lint && npm run build && npm run e2e
 ```
 
-**本次交付已执行六源全量/增量ETL、DWD宽表（10,500行）、八张主题集市、30项三粒度ADS（35,640行）、后端30项测试（`backend/app`覆盖率81.92%）、前端18项单元测试、ESLint和730模块生产构建；50问受控问数评测为50/50、100%；浏览器E2E 9/9、HTTP安全冒烟13/13、源到ADS对账11/11通过；8并发120请求压测成功率100%。** Docker、真实第三方LLM调用、生产级渗透和容量测试仍未完成，不能据此宣称全部课程任务或生产部署已经通过。详见[测试计划与报告](docs/测试计划与报告.md)和[50问评测报告](docs/50问评测报告.md)。
+执行E2E前需确保前端5173、后端8765均已启动。可先运行 `python scripts/load_test.py --workers 8 --requests 120` 做单机并发冒烟。
+
+**本次交付已执行六源全量/增量ETL、DWD宽表（10,500行）、八张主题集市、30项三粒度ADS（35,640行）、后端30项测试（`backend/app`覆盖率81.62%）、前端18项单元测试、ESLint和730模块生产构建；50问受控问数评测为50/50、100%；浏览器E2E 9/9、HTTP安全冒烟13/13、源到ADS对账11/11通过；8并发120请求压测成功率100%。** Docker、真实第三方LLM调用、生产级渗透和容量测试仍未完成，不能据此宣称全部课程任务或生产部署已经通过。详见[测试计划与报告](docs/测试计划与报告.md)和[50问评测报告](docs/50问评测报告.md)。
 
 ## 安全说明
 
@@ -250,6 +254,7 @@ cd frontend && npm test && npm run lint && npm run build
 - E2E证据：`data/derived/e2e_report.json`
 - 安全冒烟证据：`data/derived/security_check_report.json`
 - 压测证据：`data/derived/load_test_report.json`
+- 查询计划与慢SQL优化证据：`data/derived/query_plan_report.json`
 
 ### 部署与使用
 
