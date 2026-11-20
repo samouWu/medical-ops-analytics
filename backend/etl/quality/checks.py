@@ -31,6 +31,20 @@ def run_quality():
             result = {"rule_code": code, "rule_name": name, "status": "PASS" if failed == 0 else "FAIL", "checked_rows": checked, "failed_rows": failed, "duration_ms": duration, "details": "通过" if failed == 0 else f"发现{failed}条异常，已记录并等待处理"}
             conn.execute("INSERT INTO quality_result(batch_id,rule_code,rule_name,status,checked_rows,failed_rows,duration_ms,details,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
                          (batch_id, code, name, result["status"], checked, failed, duration, result["details"], now_iso()))
+            # 告警闭环：失败规则生成/刷新告警，恢复通过的规则自动关闭未处理告警。
+            if failed:
+                ratio = failed / checked if checked else 0
+                level = "HIGH" if ratio > 0.01 or failed >= 50 else "MEDIUM"
+                message = f"{name}：{failed} 条异常 / 共 {checked} 条"
+                existing = conn.execute("SELECT id FROM quality_alert WHERE rule_code=? AND status IN ('OPEN','ACKED') ORDER BY id DESC LIMIT 1", (code,)).fetchone()
+                if existing:
+                    conn.execute("UPDATE quality_alert SET batch_id=?, level=?, message=?, status='OPEN', created_at=?, acknowledged_by=NULL, acknowledged_at=NULL WHERE id=?",
+                                 (batch_id, level, message, now_iso(), existing[0]))
+                else:
+                    conn.execute("INSERT INTO quality_alert(batch_id,rule_code,rule_name,level,message,status,created_at) VALUES (?,?,?,?,?,'OPEN',?)",
+                                 (batch_id, code, name, level, message, now_iso()))
+            else:
+                conn.execute("UPDATE quality_alert SET status='RESOLVED', acknowledged_at=? WHERE rule_code=? AND status IN ('OPEN','ACKED')", (now_iso(), code))
             results.append(result)
         conn.execute("INSERT INTO etl_batch(batch_id,source_table,source_file,source_sha256,status,row_count,error_count,started_at,finished_at) VALUES (?,?,?,?,?,?,?,?,?)",
                      (batch_id, "quality", "数据质量规则集", "-", "SUCCESS" if all(x["status"] == "PASS" for x in results) else "PARTIAL", sum(x["checked_rows"] for x in results), sum(x["failed_rows"] for x in results), now_iso(), now_iso()))
@@ -44,6 +58,29 @@ def latest_quality():
             return run_quality()
         results = [dict(row) for row in conn.execute("SELECT rule_code,rule_name,status,checked_rows,failed_rows,duration_ms,details FROM quality_result WHERE batch_id=? ORDER BY id", (batch["batch_id"],))]
         batches = [dict(row) for row in conn.execute("SELECT batch_id,source_table,status,row_count,error_count,finished_at FROM etl_batch ORDER BY started_at DESC LIMIT 12")]
+        alerts = [dict(row) for row in conn.execute(
+            "SELECT id,batch_id,rule_code,rule_name,level,message,status,created_at,acknowledged_by,acknowledged_at FROM quality_alert ORDER BY CASE status WHEN 'OPEN' THEN 0 WHEN 'ACKED' THEN 1 ELSE 2 END, created_at DESC LIMIT 20")]
+        open_alerts = conn.execute("SELECT COUNT(*) FROM quality_alert WHERE status='OPEN'").fetchone()[0]
+        high_alerts = conn.execute("SELECT COUNT(*) FROM quality_alert WHERE status='OPEN' AND level='HIGH'").fetchone()[0]
     checked = sum(x["checked_rows"] for x in results)
     failed = sum(x["failed_rows"] for x in results)
-    return {"score": round(max(0, 100 - failed / checked * 100), 2) if checked else 100, "generated_at": batch["finished_at"], "results": results, "batches": batches}
+    return {"score": round(max(0, 100 - failed / checked * 100), 2) if checked else 100, "generated_at": batch["finished_at"],
+            "results": results, "batches": batches, "alerts": alerts, "open_alerts": open_alerts, "high_alerts": high_alerts}
+
+
+def list_alerts(status="open", limit=50):
+    where = "status IN ('OPEN','ACKED')" if status == "open" else "1=1"
+    with db_session() as conn:
+        rows = [dict(row) for row in conn.execute(
+            f"SELECT id,batch_id,rule_code,rule_name,level,message,status,created_at,acknowledged_by,acknowledged_at FROM quality_alert WHERE {where} ORDER BY created_at DESC LIMIT ?", (limit,))]
+        summary = conn.execute("SELECT COUNT(*) FROM quality_alert WHERE status='OPEN'").fetchone()[0]
+    return {"items": rows, "open": summary}
+
+
+def acknowledge_alert(alert_id, username):
+    with db_session() as conn:
+        row = conn.execute("SELECT id,status FROM quality_alert WHERE id=?", (alert_id,)).fetchone()
+        if not row:
+            raise ValueError("告警不存在")
+        conn.execute("UPDATE quality_alert SET status='ACKED', acknowledged_by=?, acknowledged_at=? WHERE id=?", (username, now_iso(), alert_id))
+    return {"id": alert_id, "status": "ACKED"}

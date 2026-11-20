@@ -21,3 +21,16 @@ CREATE TABLE IF NOT EXISTS metric_definition (
     description TEXT NOT NULL,
     formula TEXT NOT NULL DEFAULT ''
 );
+
+CREATE TABLE IF NOT EXISTS quality_alert (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    batch_id TEXT NOT NULL,
+    rule_code TEXT NOT NULL,
+    rule_name TEXT NOT NULL,
+    level TEXT NOT NULL,
+    message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'OPEN',
+    created_at TEXT NOT NULL,
+    acknowledged_by TEXT,
+    acknowledged_at TEXT
+);

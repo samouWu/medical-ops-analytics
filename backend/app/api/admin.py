@@ -11,7 +11,7 @@ from app.core.security import current_user, require_roles, hash_password
 from app.schemas import (AdsRefreshRequest, DataSourceRequest, DataSourceUpdateRequest, EtlJobRequest,
                          EtlJobUpdateRequest, UserRequest, UserUpdateRequest)
 from etl.jobs.pipeline import SOURCES, detect_source, import_file, import_with_retry, read_rows, refresh_ads, run_all
-from etl.quality.checks import latest_quality, run_quality
+from etl.quality.checks import acknowledge_alert, latest_quality, list_alerts, run_quality
 
 router = APIRouter(tags=["数据治理"])
 
@@ -26,6 +26,26 @@ def quality_run(user: dict = Depends(require_roles("admin", "analyst"))):
     run_quality()
     audit(user["username"], "RUN", "quality", "执行质量规则", trace_context.get())
     return ok(latest_quality())
+
+
+@router.get("/quality/alerts")
+def quality_alerts(status: str = "open", user: dict = Depends(current_user)):
+    return ok(list_alerts(status))
+
+
+@router.get("/quality/summary")
+def quality_summary(user: dict = Depends(current_user)):
+    return ok({"open": list_alerts("open", 1)["open"]})
+
+
+@router.post("/quality/alerts/{alert_id}/ack")
+def quality_ack(alert_id: int, user: dict = Depends(require_roles("admin", "analyst"))):
+    try:
+        result = acknowledge_alert(alert_id, user["username"])
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from None
+    audit(user["username"], "ACK", "quality_alert", f"确认告警{alert_id}", trace_context.get())
+    return ok(result)
 
 
 @router.post("/imports/auto")

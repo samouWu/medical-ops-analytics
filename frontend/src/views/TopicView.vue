@@ -8,6 +8,8 @@ import LineChart from '../components/charts/LineChart.vue'
 import BarChart from '../components/charts/BarChart.vue'
 import PieChart from '../components/charts/PieChart.vue'
 import ScatterChart from '../components/charts/ScatterChart.vue'
+import StackedBarChart from '../components/charts/StackedBarChart.vue'
+import WaterfallChart from '../components/charts/WaterfallChart.vue'
 import DataTable from '../components/DataTable.vue'
 import StateBlock from '../components/StateBlock.vue'
 import AppIcon from '../components/AppIcon.vue'
@@ -208,6 +210,31 @@ onMounted(async () => {
               :loading="loading"
               @chart-click="drillIntoDepartment"
             />
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div v-if="topic === 'revenue' && data.stacked" class="dashboard-grid">
+      <section class="card">
+        <div class="card-header">
+          <div><h2 class="card-heading">科室收入构成</h2><p class="card-subheading">门诊收入与住院收入按科室堆叠（万元）</p></div>
+          <span class="status-badge info">堆叠柱</span>
+        </div>
+        <div class="card-body chart-body">
+          <div class="chart chart-md">
+            <StackedBarChart :categories="data.stacked.categories" :series="data.stacked.series" unit="万元" :loading="loading" />
+          </div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-header">
+          <div><h2 class="card-heading">科室收入累计贡献</h2><p class="card-subheading">按收入从高到低累加至全院合计（万元）</p></div>
+          <AppIcon name="multidimensional" :size="18" class="header-icon" />
+        </div>
+        <div class="card-body chart-body">
+          <div class="chart chart-md">
+            <WaterfallChart :items="data.waterfall" unit="万元" :loading="loading" />
           </div>
         </div>
       </section>

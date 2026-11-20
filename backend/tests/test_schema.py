@@ -22,7 +22,7 @@ def test_reference_ddl_matches_runtime_layered_schema():
         layered_tables = {
             row[0] for row in reference.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
         }
-        assert len(layered_tables) == 25
+        assert len(layered_tables) == 26
         for table in layered_tables:
             runtime_columns = runtime.execute(f"PRAGMA table_info({table})").fetchall()
             reference_columns = reference.execute(f"PRAGMA table_info({table})").fetchall()

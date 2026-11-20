@@ -61,6 +61,33 @@ def test_all_theme_endpoints(client, admin_headers):
     assert resources["table"]["rows"][0]["turnover"] is not None
 
 
+def test_quality_alert_ack_flow(client, admin_headers):
+    from app.core.database import db_session
+    from etl.jobs.pipeline import now_iso
+
+    with db_session() as conn:
+        conn.execute("DELETE FROM quality_alert WHERE rule_code='TEST_RULE'")
+        cursor = conn.execute(
+            "INSERT INTO quality_alert(batch_id,rule_code,rule_name,level,message,status,created_at) VALUES ('testbatch','TEST_RULE','测试规则','HIGH','测试告警','OPEN',?)",
+            (now_iso(),),
+        )
+        alert_id = cursor.lastrowid
+
+    listed = client.get("/api/v1/quality/alerts", headers=admin_headers).json()["data"]
+    assert any(item["id"] == alert_id for item in listed["items"])
+    assert listed["open"] >= 1
+    summary = client.get("/api/v1/quality/summary", headers=admin_headers).json()["data"]
+    assert summary["open"] >= 1
+
+    ack = client.post(f"/api/v1/quality/alerts/{alert_id}/ack", headers=admin_headers)
+    assert ack.status_code == 200
+    assert ack.json()["data"]["status"] == "ACKED"
+    assert client.post("/api/v1/quality/alerts/999999/ack", headers=admin_headers).status_code == 404
+
+    with db_session() as conn:
+        conn.execute("DELETE FROM quality_alert WHERE rule_code='TEST_RULE'")
+
+
 def test_disease_cards_and_resource_order(client, admin_headers):
     disease = client.get("/api/v1/analytics/disease", headers=admin_headers).json()["data"]
     labels = [item["label"] for item in disease["cards"]]

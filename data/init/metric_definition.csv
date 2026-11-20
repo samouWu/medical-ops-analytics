@@ -1,4 +1,4 @@
-﻿metric_code,metric_name,topic,unit,supported,description
+﻿metric_code,metric_name,topic,unit,supported,description,formula
 K01,门诊就诊人次,门诊,人次,True,完成就诊的门诊记录计数,COUNT(*) FROM dwd_outpatient_visit WHERE visit_date BETWEEN 起止日期
 K02,门诊就诊人数,门诊,人,True,门诊患者唯一标识去重,COUNT(DISTINCT patient_key) FROM dwd_outpatient_visit WHERE visit_date BETWEEN 起止日期
 K03,预约挂号人次,门诊,人次,False,缺少预约渠道与有效挂号状态字段,源表无预约渠道、预约状态字段，无法计算
@@ -38,3 +38,4 @@ K36,检验报告及时率,质量,%,False,缺少报告时限与发布时间,按�
 K37,门诊患者人均就诊次数,门诊,次/人,True,门诊就诊人次/统计期内门诊患者去重人数,K01 门诊人次 ÷ K02 门诊人数
 K38,住院患者人均住院次数,住院,次/人,True,出院人次/统计期内住院患者去重人数,K08 出院人次 ÷ COUNT(DISTINCT patient_key)（出院患者）
 K39,检验结果异常率,服务,%,True,异常或阳性检验报告数/检验报告总数×100%,"SUM(result_text IN ('异常','阳性')) ÷ COUNT(*) FROM dwd_lis_report × 100%"
+K40,专家号占比,门诊,%,True,专家号就诊人次占门诊人次的比例，反映门诊号别结构,COUNT(visit_type='专家') ÷ K01 门诊人次 × 100%

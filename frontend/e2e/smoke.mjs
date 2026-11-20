@@ -68,6 +68,15 @@ try {
   await page.getByText('用户管理', { exact: true }).first().waitFor()
   record('系统管理四个标签', await page.getByRole('button', { name: /角色权限/ }).isVisible() && await page.getByRole('button', { name: /ETL任务管理/ }).isVisible())
 
+  await page.goto(`${BASE}/revenue`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(2400)
+  record('收入页新增堆叠柱与瀑布图', await page.getByText('科室收入构成').count() === 1 && await page.getByText('科室收入累计贡献').count() === 1)
+
+  await page.goto(`${BASE}/quality`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(2200)
+  record('质量页含告警区块', await page.getByText('质量告警', { exact: true }).count() === 1)
+  record('顶栏告警铃铛存在', await page.locator('.alert-bell').count() === 1)
+
   await page.goto(`${BASE}/disease`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(2200)
   const emptyBlocks = await page.getByText('暂无数据', { exact: true }).count()
@@ -81,7 +90,7 @@ try {
   await page.goto(`${BASE}/resources`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1000)
   record('资源效率页', await page.getByText('资源效率', { exact: true }).first().isVisible())
-  record('资源效率双柱状图已渲染', await page.locator('.resource-charts canvas').count() === 2, `canvas=${await page.locator('.resource-charts canvas').count()}`)
+  record('资源效率四个图表已渲染', await page.locator('.resource-charts canvas').count() >= 4, `canvas=${await page.locator('.resource-charts canvas').count()}`)
   record('资源明细表有数据', await page.locator('.resource-table .data-table tbody tr').count() >= 10, `rows=${await page.locator('.resource-table .data-table tbody tr').count()}`)
 
   const failed = results.filter((item) => !item.passed)

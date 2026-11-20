@@ -237,10 +237,30 @@ def analytics(topic, start, end, user, dept_code=None):
         chart_type = "line"
         trend_available = True
         card_note = ""
+        stacked = waterfall = radar = heatmap = None
         if topic == "revenue":
             distribution = [{"name": "门诊收入", "value": cards[1]["value"]}, {"name": "住院收入", "value": cards[2]["value"]}]
             fee_rows = conn.execute("SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params])
             table = {"columns": [{"key": "name", "label": "费用类别"}, {"key": "value", "label": "金额（元）", "format": "money"}], "rows": [{"name": r[0], "value": round(r[1], 2)} for r in fee_rows]}
+            # 科室收入构成（门诊/住院堆叠）与累计贡献瀑布，单位万元
+            dept_rows = conn.execute("SELECT d.dept_name,SUM(s.outpatient_revenue),SUM(s.inpatient_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1 ORDER BY (SUM(s.outpatient_revenue)+SUM(s.inpatient_revenue)) DESC", [start, end, *params]).fetchall()
+            stacked = {"categories": [r[0] for r in dept_rows],
+                       "series": [{"name": "门诊收入", "data": [round((r[1] or 0)/10000, 2) for r in dept_rows]},
+                                  {"name": "住院收入", "data": [round((r[2] or 0)/10000, 2) for r in dept_rows]}]}
+            total_wan = round(sum((r[1] or 0)+(r[2] or 0) for r in dept_rows)/10000, 2)
+            waterfall = []
+            running = 0.0
+            head = dept_rows[:5]
+            for r in head:
+                amount = round(((r[1] or 0)+(r[2] or 0))/10000, 2)
+                waterfall.append({"name": r[0], "value": amount, "base": round(running, 2), "display": f"{amount:,.0f}"})
+                running += amount
+            rest = [r for r in dept_rows[5:]]
+            if rest:
+                others = round(total_wan - running, 2)
+                waterfall.append({"name": "其他科室", "value": others, "base": round(running, 2), "display": f"{others:,.0f}"})
+                running += others
+            waterfall.append({"name": "合计", "value": total_wan, "base": 0, "display": f"{total_wan:,.0f}", "color": "#18a477"})
         elif topic in ("drugs", "consumables"):
             codes_filter = ("XY", "ZC") if topic == "drugs" else ("CL",)
             rows = conn.execute(f"SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND fee_type_code IN ({','.join('?' for _ in codes_filter)}) AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *codes_filter, *params]).fetchall()
@@ -271,6 +291,42 @@ def analytics(topic, start, end, user, dept_code=None):
             table = {"columns": [{"key": "name", "label": "科室"}, {"key": "beds", "label": "教学配置床位"}, {"key": "usage", "label": "床位使用率"}, {"key": "turnover", "label": "床位周转次数"}, {"key": "staff", "label": "教学配置人力"}, {"key": "revenue", "label": "医疗收入（元）", "format": "money"}], "rows": table_rows}
             trends = metric_values("K08", start, end, user, dept_code)
             chart_type = "bar"
+            # 科室能力雷达：取使用率前 5 的科室，四个指标各自 0-100 归一，悬停显示原值。
+            def score(value, values):
+                top = max(values) if values else 0
+                return round((value or 0)/top*100, 1) if top else 0
+
+            by_name = {row[1]: row for row in rows}
+            # 取使用率最高、中位、最低三个科室，避免五条折线互相压盖。
+            picks = {0, len(table_rows)//2, len(table_rows)-1} if table_rows else set()
+            top_rows = [table_rows[index] for index in sorted(picks)]
+            usages = [row["usage"] or 0 for row in top_rows]
+            turnovers = [row["turnover"] or 0 for row in top_rows]
+            visits = [safe_ratio(by_name[row["name"]][4] or 0, by_name[row["name"]][3] or 1) or 0 for row in top_rows]
+            incomes = [safe_ratio(by_name[row["name"]][8] or 0, by_name[row["name"]][3] or 1) or 0 for row in top_rows]
+            radar = {
+                "indicators": [
+                    {"name": "床位使用率", "max": 100},
+                    {"name": "床位周转", "max": 100},
+                    {"name": "人均门诊", "max": 100},
+                    {"name": "人均收入", "max": 100},
+                ],
+                "series": [
+                    {"name": row["name"], "value": [
+                        score(row["usage"], usages),
+                        score(row["turnover"], turnovers),
+                        score(visits[index], visits),
+                        score(incomes[index], incomes),
+                    ]}
+                    for index, row in enumerate(top_rows)
+                ],
+            }
+            # 科室 × 月份 床位使用率热力图
+            heat_rows = conn.execute("SELECT d.dept_name,substr(s.stat_date,1,7),SUM(s.occupied_bed_days),SUM(s.open_bed_days) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1,2 ORDER BY 1,2", [start, end, *params]).fetchall()
+            months = sorted({r[1] for r in heat_rows})
+            heat_depts = [row["name"] for row in table_rows]
+            cells = [[months.index(r[1]), heat_depts.index(r[0]), round((r[2] or 0)/(r[3] or 1)*100, 2)] for r in heat_rows if r[0] in heat_depts]
+            heatmap = {"xLabels": [m[5:7]+"月" for m in months], "yLabels": heat_depts, "cells": cells}
         elif topic == "service":
             service = conn.execute("SELECT SUM(lis_reports),SUM(abnormal_lis_reports) FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? AND "+where, [start, end, *params]).fetchone()
             cards = [{"key": "lis", "label": "检验报告数", "value": service[0] or 0, "unit": "份", "format": "number"}, card("K39", metric_summary("K39", start, end, user, dept_code, conn), fmt="percent")]
@@ -312,4 +368,5 @@ def analytics(topic, start, end, user, dept_code=None):
         return {"cards": cards, "trends": trends, "trend_available": trend_available, "distribution": distribution,
                 "secondary_distribution": secondary_distribution if topic == "resources" else [], "table": table,
                 "chart_type": chart_type, "bar_title": titles.get(topic, "结构分布"), "source_note": source_note, "card_note": card_note,
+                "stacked": stacked, "waterfall": waterfall, "radar": radar, "heatmap": heatmap,
                 "period": {"start": start, "end": end}}

@@ -30,7 +30,7 @@ def main():
                            [(*row, "待业务确认") for row in DEPARTMENTS]))
     files.append(write_csv("dim_disease.csv", ["disease_code", "disease_name"], DISEASES))
     files.append(write_csv("dim_fee_type.csv", ["fee_type_code", "fee_type_name", "category"], FEE_TYPES))
-    files.append(write_csv("metric_definition.csv", ["metric_code", "metric_name", "topic", "unit", "supported", "description"], METRICS))
+    files.append(write_csv("metric_definition.csv", ["metric_code", "metric_name", "topic", "unit", "supported", "description", "formula"], METRICS))
     quality_rows = [
         (code, name, "HIGH" if code.endswith("UNIQUE") or "NOT_NULL" in code else "MEDIUM", sql, "failed_rows = 0", "隔离异常行并通知数据责任人")
         for code, name, sql in RULES

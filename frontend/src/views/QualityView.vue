@@ -16,6 +16,8 @@ const data = ref(null)
 
 const results = computed(() => data.value?.results || [])
 const batches = computed(() => data.value?.batches || [])
+const alerts = computed(() => data.value?.alerts || [])
+const openAlerts = computed(() => Number(data.value?.open_alerts ?? 0))
 const passedCount = computed(() => results.value.filter((item) => ['pass', 'passed', 'success', '通过'].includes(String(item.status).toLowerCase())).length)
 const failedCount = computed(() => results.value.length - passedCount.value)
 const checkedRows = computed(() => results.value.reduce((total, item) => total + (Number(item.checked_rows) || 0), 0))
@@ -27,6 +29,13 @@ const resultColumns = [
   { key: 'failed_rows', label: '异常行数' },
   { key: 'duration_ms', label: '耗时' },
   { key: 'details', label: '规则说明', width: '30%' },
+]
+const alertColumns = [
+  { key: 'rule_name', label: '规则', width: '22%' },
+  { key: 'level', label: '级别' },
+  { key: 'message', label: '告警内容', width: '34%' },
+  { key: 'created_at', label: '生成时间', width: '18%' },
+  { key: 'actions', label: '处理' },
 ]
 const batchColumns = [
   { key: 'batch_id', label: '批次编号', width: '25%' },
@@ -63,6 +72,17 @@ async function fetchQuality() {
     error.value = errorMessage(err)
   } finally {
     loading.value = false
+  }
+}
+
+async function ackAlert(id) {
+  notice.value = ''
+  try {
+    await request(`/quality/alerts/${id}/ack`, { method: 'POST' })
+    notice.value = '告警已确认'
+    await fetchQuality()
+  } catch (err) {
+    error.value = errorMessage(err)
   }
 }
 
@@ -109,6 +129,22 @@ onMounted(fetchQuality)
       </div>
 
       <section class="card quality-table-card">
+        <div class="card-header">
+          <div><h2 class="card-heading">质量告警</h2><p class="card-subheading">规则失败时自动生成告警，确认后转为已处理；规则恢复通过时自动关闭</p></div>
+          <span class="status-badge" :class="openAlerts ? 'danger' : 'success'"><span class="status-dot" />{{ openAlerts ? `${openAlerts} 条未处理` : '全部通过' }}</span>
+        </div>
+        <StateBlock v-if="!alerts.length" compact title="当前没有质量告警" description="最近一次检查 10 条规则全部通过；规则失败或异常行超过阈值时会在这里生成告警" />
+        <DataTable v-else :columns="alertColumns" :rows="alerts" :page-size="6">
+          <template #cell-level="{ value }"><span class="status-badge" :class="value === 'HIGH' ? 'danger' : 'warning'">{{ value === 'HIGH' ? '高' : '中' }}</span></template>
+          <template #cell-created_at="{ value }">{{ formatDateTime(value) }}</template>
+          <template #cell-actions="{ row }">
+            <button v-if="row.status !== 'ACKED'" class="btn btn-sm" @click="ackAlert(row.id)">确认</button>
+            <span v-else class="ack-text">已确认</span>
+          </template>
+        </DataTable>
+      </section>
+
+      <section class="card quality-table-card">
         <div class="card-header"><div><h2 class="card-heading">质量规则检查结果</h2><p class="card-subheading">查看每项规则的覆盖范围、异常数据与执行耗时</p></div><span class="status-badge info">{{ results.length }} 项规则</span></div>
         <DataTable :columns="resultColumns" :rows="results" :page-size="8">
           <template #cell-status="{ value }"><span class="status-badge" :class="isSuccess(value) ? 'success' : 'danger'"><span class="status-dot" />{{ statusText(value) }}</span></template>
@@ -133,6 +169,12 @@ onMounted(fetchQuality)
 </template>
 
 <style scoped>
+.ack-text {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+
 .quality-message {
   display: flex;
   align-items: center;

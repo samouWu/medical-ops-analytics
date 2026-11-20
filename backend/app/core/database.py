@@ -153,6 +153,13 @@ CREATE TABLE IF NOT EXISTS quality_result (
  failed_rows INTEGER DEFAULT 0, duration_ms REAL DEFAULT 0, details TEXT,
  created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS quality_alert (
+ id INTEGER PRIMARY KEY AUTOINCREMENT, batch_id TEXT NOT NULL, rule_code TEXT NOT NULL,
+ rule_name TEXT NOT NULL, level TEXT NOT NULL, message TEXT NOT NULL,
+ status TEXT NOT NULL DEFAULT 'OPEN', created_at TEXT NOT NULL,
+ acknowledged_by TEXT, acknowledged_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_quality_alert_status ON quality_alert(status, created_at);
 CREATE TABLE IF NOT EXISTS etl_job (
  id TEXT PRIMARY KEY, name TEXT NOT NULL, source_table TEXT NOT NULL,
  schedule TEXT NOT NULL, enabled INTEGER DEFAULT 1, last_status TEXT,

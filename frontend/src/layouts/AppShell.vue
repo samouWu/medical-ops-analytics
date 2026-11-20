@@ -5,11 +5,13 @@ import AppIcon from '../components/AppIcon.vue'
 import MedicalDecor from '../components/MedicalDecor.vue'
 import { clearSession, getStoredUser } from '../stores/auth'
 import { appState, loadMeta } from '../stores/app'
+import { request } from '../api/client'
 
 const route = useRoute()
 const router = useRouter()
 const mobileOpen = ref(false)
 const user = getStoredUser() || {}
+const openAlerts = ref(0)
 
 const navGroups = [
   {
@@ -58,8 +60,23 @@ const today = new Intl.DateTimeFormat('zh-CN', {
 
 const roleName = computed(() => ({ admin: '系统管理员', analyst: '数据分析师', department: '科室用户', engineer: '数据工程师' }[user.role] || user.role || '平台用户'))
 
-watch(() => route.fullPath, () => { mobileOpen.value = false })
-onMounted(() => loadMeta())
+watch(() => route.fullPath, () => {
+  mobileOpen.value = false
+  fetchAlerts()
+})
+onMounted(() => {
+  loadMeta()
+  fetchAlerts()
+})
+
+async function fetchAlerts() {
+  try {
+    const data = await request('/quality/summary')
+    openAlerts.value = Number(data?.open ?? 0)
+  } catch {
+    openAlerts.value = 0
+  }
+}
 
 function logout() {
   clearSession()
@@ -144,6 +161,10 @@ function logout() {
             <AppIcon name="calendar" :size="16" />
             <span>{{ today }}</span>
           </div>
+          <RouterLink to="/quality" class="alert-bell" :class="{ active: openAlerts > 0 }" :title="openAlerts ? `${openAlerts} 条质量告警未处理` : '当前无质量告警'">
+            <AppIcon name="alert" :size="17" />
+            <span v-if="openAlerts" class="alert-count">{{ openAlerts > 99 ? '99+' : openAlerts }}</span>
+          </RouterLink>
           <details class="user-dropdown">
             <summary>
               <span class="topbar-avatar">{{ (user.display_name || user.username || '用').slice(0, 1) }}</span>
@@ -173,6 +194,45 @@ function logout() {
 </template>
 
 <style scoped>
+.alert-bell {
+  position: relative;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  margin-right: 4px;
+  place-items: center;
+  color: #6b7f96;
+  background: #f4f7fb;
+  border-radius: 9px;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.alert-bell:hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.alert-bell.active {
+  color: #c2410c;
+  background: #fff3e8;
+}
+
+.alert-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 17px;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 17px;
+  text-align: center;
+  background: #e25555;
+  border-radius: 9px;
+}
+
+
 .app-layout {
   min-height: 100vh;
 }

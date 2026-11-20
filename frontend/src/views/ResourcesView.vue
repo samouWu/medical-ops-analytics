@@ -4,6 +4,8 @@ import PageHeader from '../components/PageHeader.vue'
 import FilterBar from '../components/FilterBar.vue'
 import MetricCard from '../components/MetricCard.vue'
 import BarChart from '../components/charts/BarChart.vue'
+import RadarChart from '../components/charts/RadarChart.vue'
+import HeatmapChart from '../components/charts/HeatmapChart.vue'
 import DataTable from '../components/DataTable.vue'
 import StateBlock from '../components/StateBlock.vue'
 import AppIcon from '../components/AppIcon.vue'
@@ -16,7 +18,7 @@ const loading = ref(false)
 const exporting = ref(false)
 const error = ref('')
 const notice = ref('')
-const data = ref({ cards: [], table: { columns: [], rows: [] } })
+const data = ref({ cards: [], table: { columns: [], rows: [] }, radar: null, heatmap: null })
 let requestId = 0
 
 const rows = computed(() => data.value.table?.rows || [])
@@ -43,6 +45,8 @@ async function fetchData() {
     data.value = {
       cards: Array.isArray(result?.cards) ? result.cards : [],
       table: result?.table || { columns: [], rows: [] },
+      radar: result?.radar || null,
+      heatmap: result?.heatmap || null,
     }
   } catch (err) {
     if (current === requestId) error.value = errorMessage(err)
@@ -106,6 +110,23 @@ onMounted(async () => {
         <div class="card-body chart-body">
           <StateBlock v-if="!loading && !rows.length" compact />
           <div v-else class="chart chart-md"><BarChart :categories="usageCategories" :values="turnoverValues" name="床位周转次数" color="#20a995" :loading="loading" /></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="resource-charts">
+      <section class="card">
+        <div class="card-header"><div><h2 class="card-heading">科室能力雷达</h2><p class="card-subheading">使用率最高/中位/最低 3 个科室，四项指标各自 0—100 归一</p></div><span class="status-badge info">雷达图</span></div>
+        <div class="card-body chart-body">
+          <StateBlock v-if="!loading && !data.radar" compact />
+          <div v-else class="chart chart-md"><RadarChart :indicators="data.radar?.indicators || []" :series="data.radar?.series || []" :loading="loading" /></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-header"><div><h2 class="card-heading">床位使用率热力图</h2><p class="card-subheading">科室 × 月份，颜色越深使用率越高</p></div><span class="status-badge success">热力图</span></div>
+        <div class="card-body chart-body">
+          <StateBlock v-if="!loading && !data.heatmap" compact />
+          <div v-else class="chart chart-md"><HeatmapChart :x-labels="data.heatmap?.xLabels || []" :y-labels="data.heatmap?.yLabels || []" :cells="data.heatmap?.cells || []" :loading="loading" /></div>
         </div>
       </section>
     </div>
