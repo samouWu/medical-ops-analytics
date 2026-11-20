@@ -24,6 +24,10 @@ try {
   record('管理员登录并进入驾驶舱', true)
   await page.locator('.metric-card').first().waitFor({ timeout: 10000 })
   record('驾驶舱指标卡渲染', true)
+  await page.locator('.filter-field .date-trigger').first().click()
+  await page.locator('.date-popover').waitFor({ timeout: 5000 })
+  record('自定义日期弹层', await page.getByText(/2025年4月/).last().isVisible())
+  await page.keyboard.press('Escape')
 
   await page.goto(`${BASE}/metrics`, { waitUntil: 'domcontentloaded' })
   await page.getByText('指标查询', { exact: true }).first().waitFor()
