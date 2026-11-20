@@ -20,7 +20,7 @@
 | 5 | 八主题集市与三粒度ADS | content/hero | 八表矩阵+数据锚点 | 8 DWS 7,679行；30项ADS 35,640行；回刷幂等 |
 | 6 | 30项可算指标如何解释 | content/supporting | 表格+公式卡 | K01/K02、K13/K14、K16、K37-39；9项不可算 |
 | 7 | 从看板到下钻、同环比 | content/supporting | 五步演示路径 | 驾驶舱、8主题、指标周、维度报表、AI问数 |
-| 8 | 权限、测试与评测证据 | content/hero | KPI三联+证据卡 | 35/35、85.59%、18/18、E2E 9/9；RBAC |
+| 8 | 权限、测试与评测证据 | content/hero | KPI三联+证据卡 | 35/35、85.59%、18/18、E2E 10/10；RBAC |
 | 9 | 边界比演示更重要 | content/supporting | 风险清单+条件 | 主主题3个月/真实NL2SQL Key/Docker未测 |
 | 10 | 可运行、可追溯、可继续 | ending/hero | 结论+下一步 | 课程初版有条件通过；12个月/自由NL2SQL等 |
 

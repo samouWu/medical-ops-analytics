@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
+import DatePicker from './DatePicker.vue'
 import { appState, filters } from '../stores/app'
 
 const props = defineProps({
@@ -51,24 +52,22 @@ function reset() {
     <div class="filter-fields">
       <label class="filter-field">
         <span>开始日期</span>
-        <input
+        <DatePicker
           v-model="draft.start"
-          class="form-control"
-          type="date"
           :min="appState.meta.date_range.min"
           :max="appState.meta.date_range.max"
-        >
+          placeholder="开始日期"
+        />
       </label>
       <span class="date-separator">至</span>
       <label class="filter-field">
         <span>结束日期</span>
-        <input
+        <DatePicker
           v-model="draft.end"
-          class="form-control"
-          type="date"
           :min="appState.meta.date_range.min"
           :max="appState.meta.date_range.max"
-        >
+          placeholder="结束日期"
+        />
       </label>
       <label v-if="props.showDepartment" class="filter-field department-field">
         <span>科室</span>

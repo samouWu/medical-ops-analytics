@@ -20,7 +20,7 @@
     <Box style={{ flex: 1, background: '#E8EFF8', borderRadius: 9, padding: 16 }}>
       <Text style={{ fontSize: 17, color: '#4A5568' }}>前端</Text>
       <Text style={{ fontSize: 52, fontWeight: 'bold', color: '#0E3F8C', lineHeight: 1.1 }}>18 / 18</Text>
-      <Text style={{ fontSize: 16, color: '#4A5568' }}>E2E 9/9，730模块构建</Text>
+      <Text style={{ fontSize: 16, color: '#4A5568' }}>E2E 10/10，732模块构建</Text>
     </Box>
     <Box style={{ flex: 1, background: '#FFF8E1', borderRadius: 9, padding: 16 }}>
       <Text style={{ fontSize: 17, color: '#5D4037' }}>50问受控问数</Text>
@@ -42,7 +42,7 @@
     </Box>
     <Box style={{ width: 384, background: '#FFFFFF', border: '1px solid #D6DCE5', borderRadius: 9, padding: 18 }}>
       <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#0E3F8C' }}>未执行项</Text>
-      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.5 }}>浏览器E2E、Docker、并发压测、慢SQL、安全专项、真实DeepSeek/Kimi调用、12个月数据。</Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.5 }}>Docker实测、生产容量与慢SQL、渗透/限流专项、真实DeepSeek/Kimi模型SQL。12个月附加库已生成但不进入默认主题。</Text>
       <Box style={{ background: '#FDECEA', borderRadius: 6, padding: 10 }}>
         <Text style={{ fontSize: 18, color: '#B03A35' }}>所以不宣称生产验收通过。</Text>
       </Box>
