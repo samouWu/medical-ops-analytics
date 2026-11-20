@@ -235,10 +235,12 @@ def analytics(topic, start, end, user, dept_code=None):
             trends = []
             chart_type = "bar"
         elif topic == "resources":
-            rows = conn.execute("SELECT d.dept_code,d.dept_name,d.bed_count,d.staff_count,SUM(s.outpatient_visits),SUM(s.discharges),SUM(s.occupied_bed_days),SUM(s.open_bed_days),SUM(s.total_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1,2,3,4 ORDER BY 8 DESC", [start, end, *params])
-            distribution = [{"name": r[1], "value": safe_ratio(r[6], r[7], 100)} for r in rows]
-            table = {"columns": [{"key": "name", "label": "科室"}, {"key": "beds", "label": "教学配置床位"}, {"key": "usage", "label": "床位使用率"}, {"key": "turnover", "label": "床位周转次数"}, {"key": "staff", "label": "教学配置人力"}], "rows": [{"name": r[1], "beds": r[2], "staff": r[3], "usage": safe_ratio(r[6], r[7], 100), "turnover": safe_ratio(r[5]*((date.fromisoformat(end)-date.fromisoformat(start)).days+1), r[7]), "revenue": r[8]} for r in rows]}
-            trends = []
+            rows = conn.execute("SELECT d.dept_code,d.dept_name,d.bed_count,d.staff_count,SUM(s.outpatient_visits),SUM(s.discharges),SUM(s.occupied_bed_days),SUM(s.open_bed_days),SUM(s.total_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1,2,3,4 ORDER BY 8 DESC", [start, end, *params]).fetchall()
+            table_rows = [{"name": r[1], "beds": r[2], "staff": r[3], "usage": safe_ratio(r[6], r[7], 100), "turnover": safe_ratio(r[5]*((date.fromisoformat(end)-date.fromisoformat(start)).days+1), r[7]), "revenue": r[8]} for r in rows]
+            distribution = [{"name": row["name"], "value": row["usage"]} for row in table_rows]
+            secondary_distribution = [{"name": row["name"], "value": row["turnover"]} for row in table_rows]
+            table = {"columns": [{"key": "name", "label": "科室"}, {"key": "beds", "label": "教学配置床位"}, {"key": "usage", "label": "床位使用率"}, {"key": "turnover", "label": "床位周转次数"}, {"key": "staff", "label": "教学配置人力"}, {"key": "revenue", "label": "医疗收入（元）"}], "rows": table_rows}
+            trends = metric_values("K08", start, end, user, dept_code)
             chart_type = "bar"
         elif topic == "service":
             service = conn.execute("SELECT SUM(lis_reports),SUM(abnormal_lis_reports) FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? AND "+where, [start, end, *params]).fetchone()
@@ -253,4 +255,4 @@ def analytics(topic, start, end, user, dept_code=None):
             rows = conn.execute("SELECT d.dept_name,SUM(s."+dist_code+") FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params])
             distribution = [{"name": r[0], "value": r[1]} for r in rows]
             table = {"columns": [{"key": "name", "label": "科室"}, {"key": "value", "label": cards[0]["label"]}], "rows": distribution}
-        return {"cards": cards, "trends": trends, "distribution": distribution, "table": table, "chart_type": chart_type, "period": {"start": start, "end": end}}
+        return {"cards": cards, "trends": trends, "distribution": distribution, "secondary_distribution": secondary_distribution if topic == "resources" else [], "table": table, "chart_type": chart_type, "period": {"start": start, "end": end}}

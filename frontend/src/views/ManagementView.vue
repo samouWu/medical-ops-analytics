@@ -80,7 +80,7 @@ onMounted(async () => {
       <button class="btn btn-sm" @click="fetchDashboard">重试</button>
     </div>
 
-    <div v-if="data.cards.length || loading" class="metrics-grid">
+    <div v-if="data.cards.length || loading" class="metrics-grid dashboard-metrics">
       <template v-if="loading && !data.cards.length">
         <div v-for="index in 4" :key="index" class="card metric-skeleton">
           <div class="skeleton" style="width: 40%; height: 13px" />
@@ -156,9 +156,56 @@ onMounted(async () => {
   flex: 1;
 }
 
+.dashboard-metrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.dashboard-metrics :deep(.metric-card) {
+  min-width: 0;
+  padding: 17px 16px 15px;
+}
+
+.dashboard-metrics :deep(.metric-content) {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.dashboard-metrics :deep(.metric-value) {
+  min-width: 0;
+  font-size: clamp(18px, 1.35vw, 22px);
+  letter-spacing: -0.8px;
+}
+
+.dashboard-metrics :deep(.metric-icon) {
+  width: 32px;
+  height: 32px;
+}
+
+.dashboard-metrics :deep(.metric-label) {
+  font-size: 12px;
+}
+
 .metric-skeleton {
   min-height: 147px;
   padding: 22px 20px;
+}
+
+@media (max-width: 1280px) {
+  .dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-metrics > :last-child { grid-column: 1 / -1; }
+  .dashboard-metrics :deep(.metric-value) { font-size: 28px; }
+}
+
+@media (max-width: 820px) {
+  .dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .dashboard-metrics { grid-template-columns: 1fr; }
+  .dashboard-metrics > :last-child { grid-column: auto; }
+  .dashboard-metrics :deep(.metric-value) { font-size: 24px; }
 }
 
 .chart-body {
