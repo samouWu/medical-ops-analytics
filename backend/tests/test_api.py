@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 
 def test_health_and_login(client):
     assert client.get("/health").json()["data"]["status"] == "UP"
@@ -17,9 +19,25 @@ def test_real_dataset_dashboard_reconciliation(client, admin_headers):
     cards = {item["key"]: item["value"] for item in data["cards"]}
     assert cards["K01"] == 9000
     assert cards["K08"] == 1500
-    assert cards["K16"] > 0
+    # 账单口径：门诊收费单金额 3,826,341.68 + 住院结算总费用 23,919,437.68
+    assert cards["K16"] == pytest.approx(27745779.36, abs=0.01)
+    revenue_cards = {item["key"]: item["value"] for item in client.get("/api/v1/analytics/revenue", headers=admin_headers).json()["data"]["cards"]}
+    assert revenue_cards["K17"] == pytest.approx(3826341.68, abs=0.01)
+    assert revenue_cards["K18"] == pytest.approx(23919437.68, abs=0.01)
+    # 实际占用床日 14,317 ÷ 实际开放床日 31,395（345 床 × 91 天）
+    assert cards["K12"] == pytest.approx(45.6028, abs=0.01)
+    assert cards["K22"] == pytest.approx(35.2643, abs=0.01)
     assert len(data["trends"]) == 91
     assert len(data["top_departments"]) == 5
+
+
+def test_billing_revenue_metrics_are_traceable(client, admin_headers):
+    expected = {"K19": 425.1491, "K20": 15946.2918, "K13": 9.5447, "K14": 4.3478, "K10": 14317, "K11": 31395}
+    for code, value in expected.items():
+        response = client.get(f"/api/v1/metrics/{code}/values?grain=month", headers=admin_headers)
+        assert response.status_code == 200, code
+        summary = response.json()["data"]["summary"]
+        assert summary == pytest.approx(value, abs=0.01), code
 
 
 def test_department_row_level_permission(client, dept_headers):

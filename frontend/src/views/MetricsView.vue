@@ -8,7 +8,7 @@ import StateBlock from '../components/StateBlock.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { request } from '../api/client'
 import { filterParams, loadMeta } from '../stores/app'
-import { errorMessage, formatMetric } from '../utils/format'
+import { errorMessage, formatMetric, formatNumber, isMoneyUnit } from '../utils/format'
 
 const metrics = ref([])
 const selectedCode = ref('')
@@ -30,9 +30,14 @@ const filteredMetrics = computed(() => {
 })
 const selectedMetric = computed(() => metrics.value.find((item) => item.code === selectedCode.value))
 const points = computed(() => values.value?.points || [])
+const wanUnit = computed(() => isMoneyUnit(values.value?.metric?.unit))
+const chartUnit = computed(() => (wanUnit.value ? '万元' : values.value?.metric?.unit || selectedMetric.value?.unit || ''))
 const chartSeries = computed(() => [{
-  name: values.value?.metric?.name || selectedMetric.value?.name || '指标值',
-  data: points.value.map((item) => item.value),
+  name: `${values.value?.metric?.name || selectedMetric.value?.name || '指标值'}${wanUnit.value ? '（万元）' : ''}`,
+  data: points.value.map((item) => {
+    if (item.value === null || item.value === undefined) return null
+    return wanUnit.value ? Number((Number(item.value)/10000).toFixed(2)) : item.value
+  }),
 }])
 const summaryItems = computed(() => {
   const summary = values.value?.summary
@@ -41,10 +46,17 @@ const summaryItems = computed(() => {
   const labels = { sum: '合计', avg: '平均值', average: '平均值', max: '最大值', min: '最小值', count: '记录数', latest: '最新值', value: '指标值' }
   return Object.entries(summary).map(([key, value]) => ({ label: labels[key] || key, value }))
 })
-const pointColumns = [
+const pointColumns = computed(() => [
   { key: 'date', label: '日期', width: '45%' },
-  { key: 'value', label: '指标值' },
-]
+  { key: 'value', label: `指标值${wanUnit.value ? '（万元）' : ''}` },
+])
+
+// 明细表整列统一单位，避免同一列出现元与万元混排。
+function formatPointValue(value) {
+  if (value === null || value === undefined) return '—'
+  if (wanUnit.value) return `${formatNumber(Number(value)/10000, 'currency')}万元`
+  return formatMetric(value, values.value?.metric?.unit)
+}
 
 async function fetchMetrics() {
   loadingMetrics.value = true
@@ -144,7 +156,7 @@ onMounted(async () => {
               <LineChart
                 :dates="points.map((item) => item.date)"
                 :series="chartSeries"
-                :y-axis-name="values?.metric?.unit || selectedMetric?.unit || ''"
+                :y-axis-name="chartUnit"
                 :loading="loadingValues"
               />
             </div>
@@ -154,7 +166,7 @@ onMounted(async () => {
         <section class="card points-card">
           <div class="card-header"><h2 class="card-heading">指标明细</h2></div>
           <DataTable :columns="pointColumns" :rows="points" :loading="loadingValues" :page-size="8">
-            <template #cell-value="{ value }"><strong class="point-value">{{ formatMetric(value, values?.metric?.unit) }}</strong></template>
+            <template #cell-value="{ value }"><strong class="point-value">{{ formatPointValue(value) }}</strong></template>
           </DataTable>
         </section>
       </div>

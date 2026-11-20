@@ -29,8 +29,11 @@ let requestId = 0
 const trendSeries = computed(() => {
   const trends = data.value.trends || []
   const type = data.value.chart_type === 'bar' ? 'bar' : 'line'
+  const maxValue = trends.reduce((acc, item) => Math.max(acc, Math.abs(Number(item.value) || 0)), 0)
+  const wan = ['revenue', 'drugs', 'consumables'].includes(topic) && maxValue >= 100000
+  const values = wan ? trends.map((item) => Number(((Number(item.value) || 0)/10000).toFixed(2))) : trends.map((item) => item.value)
   return [
-    { name: trends[0]?.label || '指标值', data: trends.map((item) => item.value), type, area: type === 'line' },
+    { name: `${trends[0]?.label || '指标值'}${wan ? '（万元）' : ''}`, data: values, type, area: type === 'line' },
     ...(trends.some((item) => item.value2 !== null && item.value2 !== undefined) ? [{
       name: trends[0]?.label2 || '对比指标',
       data: trends.map((item) => item.value2),
@@ -42,6 +45,14 @@ const trendSeries = computed(() => {
 })
 
 const distributionHorizontal = computed(() => data.value.chart_type === 'horizontal_bar' || (data.value.distribution || []).length > 8)
+// 收入/药品/耗材主题的结构金额按万元展示，其余主题保留原始计量单位。
+const moneyTopic = computed(() => ['revenue', 'drugs', 'consumables'].includes(topic))
+const wanScale = computed(() => moneyTopic.value && (data.value.distribution || []).some((item) => Math.abs(Number(item.value) || 0) >= 100000))
+const chartDistribution = computed(() => {
+  const items = data.value.distribution || []
+  if (!wanScale.value) return items
+  return items.map((item) => ({ ...item, value: Number((Number(item.value || 0) / 10000).toFixed(2)) }))
+})
 const scatterPoints = computed(() => (data.value.table?.rows || []).map((item) => [
   Number(item.revenue || 0) / 10000,
   Number(item.usage || 0),
@@ -167,9 +178,9 @@ onMounted(async () => {
             />
             <BarChart
               v-else-if="distributionHorizontal"
-              :categories="data.distribution.map((item) => item.name)"
-              :values="data.distribution.map((item) => item.value)"
-              :name="data.bar_title || '数量'"
+              :categories="chartDistribution.map((item) => item.name)"
+              :values="chartDistribution.map((item) => item.value)"
+              :name="`${data.bar_title || '数量'}${wanScale ? '（万元）' : ''}`"
               horizontal
               color="#20a995"
               :loading="loading"
@@ -177,8 +188,9 @@ onMounted(async () => {
             />
             <PieChart
               v-else
-              :data="data.distribution"
+              :data="chartDistribution"
               :name="data.bar_title || '构成'"
+              :unit="wanScale ? ' 万元' : ''"
               :loading="loading"
               @chart-click="drillIntoDepartment"
             />

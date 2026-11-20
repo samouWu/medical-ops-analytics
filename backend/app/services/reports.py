@@ -153,7 +153,7 @@ def generate_report(period, value, user, dept_code=None):
             "content": (
                 "建议优先复核收入变化贡献最大的科室，并同时核对门诊人次、出院人次和次均费用，避免把单一金额变化直接归因。"
                 "床位使用率前三科室："+"；".join(f"{row[0]} {row[1]:.2f}%" for row in bed_rows if row[1] is not None)+"。"
-                "收入采用HIS收费明细净额；门诊人数与人次分离；比率先汇总分子分母再相除。DRG估算指标不纳入本报告正式评价，床位和人力为教学配置。"
+                "收入采用账单口径（门诊收费单金额+住院结算总费用），药品与耗材结构按收费明细口径；门诊人数与人次分离；比率先汇总分子分母再相除。DRG估算指标不纳入本报告正式评价，床位和人力为教学配置。"
             ),
             "evidence": {"metrics": ["K16", "K01", "K08", "K12", "K22", "K24"], "thresholds": {"revenue_change_pct": 5, "visit_change_pct": 10, "drug_ratio_pct": 35}, "boundary": "教学口径，不用于真实绩效"},
         },

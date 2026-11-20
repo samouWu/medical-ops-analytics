@@ -1,12 +1,15 @@
 <script setup>
 import { computed } from 'vue'
 import AppIcon from './AppIcon.vue'
-import { formatNumber } from '../utils/format'
+import { formatNumber, splitMoney } from '../utils/format'
 
 const props = defineProps({
   card: { type: Object, required: true },
   index: { type: Number, default: 0 },
 })
+
+// 金额类指标统一按万元展示，其余指标保持原单位。
+const display = computed(() => splitMoney(props.card.value, props.card.unit))
 
 const iconName = computed(() => {
   const key = `${props.card.key || ''} ${props.card.label || ''}`.toLowerCase()
@@ -30,8 +33,8 @@ const tone = computed(() => ['blue', 'teal', 'orange', 'purple'][props.index % 4
       <span class="metric-icon"><AppIcon :name="iconName" :size="20" /></span>
     </div>
     <div class="metric-content">
-      <strong class="metric-value">{{ formatNumber(card.value, card.format) }}</strong>
-      <span v-if="card.unit" class="metric-unit">{{ card.unit }}</span>
+      <strong class="metric-value">{{ formatNumber(display.value, card.format) }}</strong>
+      <span v-if="display.unit" class="metric-unit">{{ display.unit }}</span>
     </div>
     <div class="metric-footnote">
       <span class="metric-indicator" />当前筛选范围统计

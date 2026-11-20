@@ -93,7 +93,10 @@ def check_supplemental_db():
         assert bounds == ("2025-04-01", "2026-03-31", 12), bounds
         charge_total = conn.execute("SELECT ROUND(SUM(amount),2) FROM dwd_charge_detail").fetchone()[0]
         revenue_total = conn.execute("SELECT ROUND(SUM(total_revenue),2) FROM dws_dept_day").fetchone()[0]
-        assert charge_total == revenue_total, (charge_total, revenue_total)
+        bill_total = conn.execute("""SELECT ROUND((SELECT SUM(fee_amount) FROM dwd_outpatient_visit)
+            + (SELECT SUM(total_fee) FROM dwd_inpatient_stay),2)""").fetchone()[0]
+        # 账单口径（门诊收费单+住院结算）必须与DWS总收入一致；收费明细是另一套口径，仅用于费别结构。
+        assert bill_total == revenue_total, (bill_total, revenue_total)
         duplicate_charge = conn.execute("SELECT COUNT(*)-COUNT(DISTINCT charge_id) FROM dwd_charge_detail").fetchone()[0]
         assert duplicate_charge == 0
         grains = dict(conn.execute("SELECT grain,COUNT(*) FROM ads_metric_result GROUP BY grain").fetchall())
@@ -103,7 +106,7 @@ def check_supplemental_db():
     assert ads_metrics == (30, 141900), ads_metrics
     assert wide == 41022, wide
     return {"date_range": {"start": bounds[0], "end": bounds[1]}, "month_count": bounds[2],
-            "charge_total": charge_total, "revenue_total": revenue_total,
+            "charge_total": charge_total, "bill_total": bill_total, "revenue_total": revenue_total,
             "duplicate_charge_ids": duplicate_charge, "ads_grains": grains, "theme_rows": themes,
             "ads_metrics": ads_metrics, "dwd_wide_rows": wide}
 

@@ -167,7 +167,7 @@ def _build_multi_report(payload, user):
     columns = [{"key": "date", "label": "统计期"}]
     if "dept_code" in payload.dimensions:
         columns.append({"key": "dept_name", "label": "科室"})
-    columns += [{"key": code, "label": METRIC_MAP[code]["name"]} for code in payload.metrics]
+    columns += [{"key": code, "label": f"{METRIC_MAP[code]['name']}（{METRIC_MAP[code]['unit']}）", "format": "money" if METRIC_MAP[code]["unit"].startswith("元") else "percent" if METRIC_MAP[code]["unit"] == "%" else "number"} for code in payload.metrics]
     for comparison in payload.comparisons:
         suffix = "同比" if comparison == "yoy" else "环比"
         columns += [{"key": f"{code}_{comparison}", "label": f"{METRIC_MAP[code]['name']}{suffix}", "format": "percent"} for code in payload.metrics]
@@ -187,9 +187,16 @@ def export_multi_report(payload: ReportQuery, user: dict = Depends(current_user)
     book = Workbook()
     sheet = book.active
     sheet.title = "多维报表"
-    sheet.append([column["label"] for column in result["columns"]])
+    money_keys = {column["key"] for column in result["columns"] if column.get("format") == "money"}
+    sheet.append([column["label"].replace("元", "万元") if column["key"] in money_keys else column["label"] for column in result["columns"]])
     for row in result["rows"]:
-        sheet.append([row.get(column["key"]) for column in result["columns"]])
+        values = []
+        for column in result["columns"]:
+            value = row.get(column["key"])
+            if column["key"] in money_keys and isinstance(value, (int, float)):
+                value = round(value/10000, 2)
+            values.append(value)
+        sheet.append(values)
     sheet.freeze_panes = "A2"
     output = io.BytesIO()
     book.save(output)
@@ -206,13 +213,23 @@ def export_topic(topic: str, start: str | None = None, end: str | None = None, d
     sheet.title = "运营指标"
     sheet.append(["指标", "数值", "单位"])
     for item in data["cards"]:
-        sheet.append([item["label"], item["value"], item["unit"]])
+        value, unit = item["value"], item["unit"]
+        if unit.startswith("元") and isinstance(value, (int, float)) and abs(value) >= 100000:
+            value, unit = round(value/10000, 2), unit.replace("元", "万元")
+        sheet.append([item["label"], value, unit])
     detail = book.create_sheet("维度明细")
     columns = data.get("table", {}).get("columns") or [{"key": "dept_name", "label": "科室"}, {"key": "revenue", "label": "收入"}]
-    detail.append([col["label"] for col in columns])
+    money_columns = {col["key"] for col in columns if "元" in str(col.get("label", ""))}
+    detail.append([col["label"].replace("元", "万元") if col["key"] in money_columns else col["label"] for col in columns])
     rows = data.get("table", {}).get("rows") or data.get("top_departments", [])
     for row in rows:
-        detail.append([row.get(col["key"]) for col in columns])
+        values = []
+        for col in columns:
+            value = row.get(col["key"])
+            if col["key"] in money_columns and isinstance(value, (int, float)):
+                value = round(value/10000, 2)
+            values.append(value)
+        detail.append(values)
     output = io.BytesIO()
     book.save(output)
     output.seek(0)

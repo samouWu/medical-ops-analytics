@@ -1,3 +1,8 @@
+const MONEY_UNIT = /元/
+
+/** 金额超过 10 万元时折算为万元展示，避免卡片出现超长数字串 */
+export const MONEY_WAN_THRESHOLD = 100000
+
 export function formatNumber(value, format = 'number') {
   if (value === null || value === undefined || value === '') return '—'
   const number = Number(value)
@@ -13,7 +18,29 @@ export function formatNumber(value, format = 'number') {
   return new Intl.NumberFormat('zh-CN', options).format(number)
 }
 
+export function isMoneyUnit(unit = '') {
+  return MONEY_UNIT.test(String(unit ?? ''))
+}
+
+/** 金额拆分：返回 { value, unit }，大额金额自动换算成万元 */
+export function splitMoney(value, unit = '元', threshold = MONEY_WAN_THRESHOLD) {
+  const text = String(unit ?? '')
+  const number = Number(value)
+  if (!isMoneyUnit(text) || !Number.isFinite(number) || Math.abs(number) < threshold) {
+    return { value, unit: text }
+  }
+  return { value: number / 10000, unit: text.replace('元', '万元') }
+}
+
+export function formatMoney(value, unit = '元', format = 'currency') {
+  const display = splitMoney(value, unit)
+  const text = formatNumber(display.value, format)
+  if (text === '—' || !display.unit) return text
+  return `${text}${display.unit}`
+}
+
 export function formatMetric(value, unit = '', format = 'number') {
+  if (isMoneyUnit(unit)) return formatMoney(value, unit, format === 'number' ? 'currency' : format)
   const formatted = formatNumber(value, format)
   if (formatted === '—' || !unit) return formatted
   return `${formatted}${unit}`

@@ -10,7 +10,7 @@ import AppIcon from '../components/AppIcon.vue'
 import { downloadFile, request } from '../api/client'
 import { filterParams, loadMeta } from '../stores/app'
 import { downloadBlob } from '../utils/helpers'
-import { errorMessage } from '../utils/format'
+import { errorMessage, formatMetric } from '../utils/format'
 
 const loading = ref(false)
 const exporting = ref(false)
@@ -29,7 +29,7 @@ const columns = [
   { key: 'usage', label: '床位使用率', format: 'percent' },
   { key: 'turnover', label: '床位周转次数' },
   { key: 'staff', label: '配置人力' },
-  { key: 'revenue', label: '医疗收入（元）' },
+  { key: 'revenue', label: '医疗收入（元）', format: 'money' },
 ]
 
 async function fetchData() {
@@ -114,7 +114,7 @@ onMounted(async () => {
       <DataTable :columns="columns" :rows="rows" :loading="loading" :page-size="10">
         <template #cell-usage="{ value }"><strong class="usage-value">{{ value === null ? '—' : `${value.toFixed(2)}%` }}</strong></template>
         <template #cell-turnover="{ value }"><strong class="turnover-value">{{ value === null ? '—' : Number(value).toFixed(2) }}</strong></template>
-        <template #cell-revenue="{ value }">{{ value === null ? '—' : Number(value).toLocaleString('zh-CN', { maximumFractionDigits: 2 }) }}</template>
+        <template #cell-revenue="{ value }">{{ formatMetric(value, '元') }}</template>
       </DataTable>
     </section>
   </div>

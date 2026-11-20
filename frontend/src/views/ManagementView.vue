@@ -15,6 +15,9 @@ const loading = ref(false)
 const error = ref('')
 const data = ref({ cards: [], trends: [], top_departments: [] })
 const drillDepartment = computed(() => appState.meta.departments.find((item) => item.dept_code === filters.dept_code))
+// 收入趋势与科室排行统一折算为万元，与指标卡口径保持一致。
+const revenueTrend = computed(() => data.value.trends.map((item) => Number(((item.revenue || 0)/10000).toFixed(2))))
+const departmentRevenue = computed(() => data.value.top_departments.map((item) => Number(((item.revenue || 0)/10000).toFixed(2))))
 let requestId = 0
 
 async function fetchDashboard() {
@@ -106,7 +109,7 @@ onMounted(async () => {
               :dates="data.trends.map((item) => item.date)"
               :series="[
                 { name: '门诊人次', data: data.trends.map((item) => item.outpatient_visits), area: true },
-                { name: '医疗收入', data: data.trends.map((item) => item.revenue), yAxisIndex: 1, area: false },
+                { name: '医疗收入（万元）', data: revenueTrend, yAxisIndex: 1, area: false },
               ]"
               :loading="loading"
             />
@@ -124,8 +127,8 @@ onMounted(async () => {
           <div v-else class="chart chart-lg">
             <BarChart
               :categories="data.top_departments.map((item) => item.dept_name)"
-              :values="data.top_departments.map((item) => item.revenue)"
-              name="医疗收入"
+              :values="departmentRevenue"
+              name="医疗收入（万元）"
               horizontal
               color="#2f7cf6"
               :loading="loading"

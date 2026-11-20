@@ -12,6 +12,7 @@ from openpyxl import load_workbook
 
 from app.core.config import BASE_DIR, DATA_DIR
 from app.core.database import db_session, init_db
+from app.services.metrics import ACTUAL_OPEN_BEDS
 
 SOURCES = {
     "his_outpatient": {"path": "mock_his/his_outpatient.csv", "pk": "visit_id", "date": "visit_date", "required": ["visit_id", "patient_id", "dept_code", "visit_date", "fee_amount"]},
@@ -414,6 +415,9 @@ def _refresh_ads(conn, start=None, end=None, grains=("day", "week", "month"), de
             out_unique = out_patients.get((period, dept), 0)
             in_unique = in_patients.get((period, dept), 0)
             day_count = date_counts.get(period, 1)
+            if dept == "ALL":
+                # 全院开放床日按实际开放床位复算（编制375张中急诊科30张为观察床）。
+                open_days = ACTUAL_OPEN_BEDS*day_count
             metrics = {
                 "K01": visits, "K02": out_unique,
                 "K06": _ratio(visits-out_unique, visits, 100),
@@ -470,13 +474,15 @@ def rebuild_warehouse():
             if key not in rows:
                 rows[key] = dict.fromkeys(("outpatient_visits", "outpatient_patients", "outpatient_revenue", "admissions", "discharges", "inpatient_revenue", "drug_revenue", "consumable_revenue", "total_revenue", "stay_days", "occupied_bed_days", "open_bed_days", "lis_reports", "abnormal_lis_reports"), 0)
             return rows[key]
+        # 收入采用账单口径：门诊收费单金额 + 住院结算总费用，与门诊/住院人次同源，避免明细与账单混算。
         for row in conn.execute("SELECT visit_date,dept_code,COUNT(*) n,COUNT(DISTINCT patient_key) p,SUM(fee_amount) fee FROM dwd_outpatient_visit GROUP BY 1,2"):
-            item(row[0], row[1]).update(outpatient_visits=row[2], outpatient_patients=row[3])
+            target = item(row[0], row[1])
+            target.update(outpatient_visits=row[2], outpatient_patients=row[3])
+            target["outpatient_revenue"] += row[4] or 0
+            target["total_revenue"] += row[4] or 0
+        # 药品/耗材收入仅有收费明细来源，保留明细口径，供费别结构与占比分析使用。
         for row in conn.execute("SELECT fee_date,dept_code,visit_type,fee_type_code,SUM(amount) amount FROM dwd_charge_detail GROUP BY 1,2,3,4"):
             target = item(row[0], row[1])
-            target["total_revenue"] += row[4] or 0
-            if row[2] == "门诊": target["outpatient_revenue"] += row[4] or 0
-            if row[2] == "住院": target["inpatient_revenue"] += row[4] or 0
             if row[3] in ("XY", "ZC"): target["drug_revenue"] += row[4] or 0
             if row[3] == "CL": target["consumable_revenue"] += row[4] or 0
         for row in conn.execute("SELECT admit_date,discharge_date,dept_code,stay_days,total_fee FROM dwd_inpatient_stay"):
@@ -485,13 +491,26 @@ def rebuild_warehouse():
             target = item(row[1], row[2])
             target["discharges"] += 1
             target["stay_days"] += row[3] or 0
-            days = max((discharge-admit).days, 1)
+            # 实际占用床日按入院至出院逐日归属，当日出入院计 0 床日，与源字段 stay_days 可对账。
             cursor = admit
+            occupied = 0
             while cursor < discharge:
                 item(cursor.isoformat(), row[2])["occupied_bed_days"] += 1
                 cursor += timedelta(days=1)
-            if days == 1 and admit == discharge:
-                item(row[0], row[2])["occupied_bed_days"] += 1
+                occupied += 1
+            # 住院收入按住院日分摊，避免期末集中出院导致单日收入尖峰；区间合计仍等于出院结算总费用。
+            fee = row[4] or 0
+            if occupied:
+                daily_fee = fee/occupied
+                cursor = admit
+                while cursor < discharge:
+                    daily = item(cursor.isoformat(), row[2])
+                    daily["inpatient_revenue"] += daily_fee
+                    daily["total_revenue"] += daily_fee
+                    cursor += timedelta(days=1)
+            else:
+                target["inpatient_revenue"] += fee
+                target["total_revenue"] += fee
         # LIS 按关联就诊科室汇总；未关联记录不进入科室指标。
         lis_sql = """SELECT l.report_date,COALESCE(o.dept_code,i.dept_code) dept,COUNT(*) n,
                      SUM(CASE WHEN l.result_text IN ('异常','阳性') THEN 1 ELSE 0 END) abnormal

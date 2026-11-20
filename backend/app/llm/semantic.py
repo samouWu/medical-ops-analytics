@@ -100,11 +100,15 @@ def date_range(conn):
 def format_value(code, value):
     if value is None:
         return "暂无可用数据"
-    if METRIC_MAP[code]["unit"] == "%":
+    unit = METRIC_MAP[code]["unit"]
+    if unit == "%":
         return f"{value:.2f}%"
-    if METRIC_MAP[code]["unit"] == "元":
-        return f"{value/10000:.2f}万元"
-    return f"{value:,.2f}{METRIC_MAP[code]['unit']}"
+    if unit.startswith("元"):
+        # 大额金额统一折合万元，小额的次均费用等仍按元展示。
+        if abs(value) >= 100000:
+            return f"{value/10000:,.2f}{unit.replace('元', '万元')}"
+        return f"{value:,.2f}{unit}"
+    return f"{value:,.2f}{unit}"
 
 
 def llm_interpretation(question, facts):

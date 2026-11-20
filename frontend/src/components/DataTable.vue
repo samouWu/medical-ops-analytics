@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import AppIcon from './AppIcon.vue'
 import StateBlock from './StateBlock.vue'
-import { formatNumber } from '../utils/format'
+import { formatNumber, MONEY_WAN_THRESHOLD } from '../utils/format'
 
 const props = defineProps({
   columns: { type: Array, default: () => [] },
@@ -31,9 +31,20 @@ watch(pageCount, (count) => {
   if (currentPage.value > count) currentPage.value = count
 })
 
+// 金额列（format=money）在数值达到 10 万元时整体按万元展示，表头单位同步改写。
+const displayColumns = computed(() => props.columns.map((column) => {
+  if (column.format !== 'money') return column
+  const max = props.rows.reduce((acc, row) => Math.max(acc, Math.abs(Number(row?.[column.key]) || 0)), 0)
+  if (max < MONEY_WAN_THRESHOLD) return column
+  return { ...column, scale: 10000, label: String(column.label ?? '').replace('元', '万元') }
+}))
+
 function displayValue(value, column = {}) {
   if (value === null || value === undefined || value === '') return '—'
-  if (typeof value === 'number') return column.format === 'percent' ? `${formatNumber(value)}%` : formatNumber(value)
+  if (typeof value === 'number') {
+    const number = column.scale ? value / column.scale : value
+    return column.format === 'percent' ? `${formatNumber(number)}%` : formatNumber(number)
+  }
   if (Array.isArray(value)) return value.join('、')
   if (typeof value === 'object') return '—'
   return String(value)
@@ -54,14 +65,14 @@ function getRowKey(row, index) {
         <table class="data-table">
           <thead>
             <tr>
-              <th v-for="column in columns" :key="column.key" :style="column.width ? { width: column.width } : undefined">
+              <th v-for="column in displayColumns" :key="column.key" :style="column.width ? { width: column.width } : undefined">
                 {{ column.label }}
               </th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, index) in visibleRows" :key="getRowKey(row, index)">
-              <td v-for="column in columns" :key="column.key">
+              <td v-for="column in displayColumns" :key="column.key">
                 <slot :name="`cell-${column.key}`" :row="row" :value="row[column.key]" :index="index">
                   {{ displayValue(row[column.key], column) }}
                 </slot>
