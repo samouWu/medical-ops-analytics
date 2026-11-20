@@ -31,7 +31,7 @@ def previous_period(period, start, end):
     if period == "month":
         previous_start = (first-timedelta(days=1)).replace(day=1).isoformat()
     else:
-        previous_start = (last-timedelta(days=7)).isoformat()
+        previous_start = (first-timedelta(days=7)).isoformat()
     return previous_start, previous_end
 
 
