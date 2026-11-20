@@ -24,6 +24,8 @@ try {
   record('管理员登录并进入驾驶舱', true)
   await page.locator('.metric-card').first().waitFor({ timeout: 10000 })
   record('驾驶舱指标卡渲染', true)
+  const metricTops = await page.locator('.dashboard-metrics .metric-card').evaluateAll((cards) => cards.map((card) => Math.round(card.getBoundingClientRect().top)))
+  record('驾驶舱指标卡单行无空位', metricTops.length === 5 && new Set(metricTops).size === 1)
   await page.locator('.filter-field .date-trigger').first().click()
   await page.locator('.date-popover').waitFor({ timeout: 5000 })
   record('自定义日期弹层', await page.getByText(/2025年4月/).last().isVisible())
@@ -34,6 +36,7 @@ try {
   await page.getByRole('button', { name: '按周' }).click()
   await page.waitForTimeout(1200)
   record('指标查询页与按周切换', await page.getByText(/个数据点/).isVisible().catch(() => false))
+  record('指标目录只展示可计算指标', await page.locator('.catalog-code').count() === 30, `count=${await page.locator('.catalog-code').count()}`)
 
   await page.goto(`${BASE}/reports/multidimensional`, { waitUntil: 'domcontentloaded' })
   await page.getByText('报表配置').waitFor()
@@ -58,6 +61,8 @@ try {
   await page.goto(`${BASE}/resources`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1000)
   record('资源效率页', await page.getByText('资源效率', { exact: true }).first().isVisible())
+  record('资源效率双柱状图已渲染', await page.locator('.resource-charts canvas').count() === 2, `canvas=${await page.locator('.resource-charts canvas').count()}`)
+  record('资源明细表有数据', await page.locator('.resource-table .data-table tbody tr').count() >= 10, `rows=${await page.locator('.resource-table .data-table tbody tr').count()}`)
 
   const failed = results.filter((item) => !item.passed)
   const report = { total: results.length, passed: results.length-failed.length, failed: failed.length, results }
