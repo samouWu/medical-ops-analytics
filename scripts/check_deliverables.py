@@ -48,6 +48,7 @@ REQUIRED = {
         "data/supplemental_12m/monthly_summary.csv",
         "data/derived/reconciliation_report.json", "data/derived/e2e_report.json",
         "data/derived/security_check_report.json", "data/derived/load_test_report.json",
+        "data/derived/query_plan_report.json",
     ],
 }
 
@@ -138,6 +139,14 @@ def main():
     supplemental_verification = supplemental["verification"]
     assert supplemental_verification["month_count"] == 12
     supplemental_db = check_supplemental_db()
+    e2e = json.loads((PROJECT / "data/derived/e2e_report.json").read_text(encoding="utf-8"))
+    security = json.loads((PROJECT / "data/derived/security_check_report.json").read_text(encoding="utf-8"))
+    reconciliation = json.loads((PROJECT / "data/derived/reconciliation_report.json").read_text(encoding="utf-8"))
+    load = json.loads((PROJECT / "data/derived/load_test_report.json").read_text(encoding="utf-8"))
+    assert e2e["failed"] == 0
+    assert security["summary"]["failed"] == 0
+    assert reconciliation["summary"]["failed"] == 0
+    assert load["failure"] == 0
     report = {
         "required_files": sum(len(items) for items in REQUIRED.values()),
         "missing_files": missing,
@@ -154,6 +163,13 @@ def main():
                 "theme_rows": supplemental_verification["theme_rows"],
             },
             "database_recheck": supplemental_db,
+        },
+        "test_evidence": {
+            "e2e": f"{e2e['passed']}/{e2e['total']}",
+            "security": f"{security['summary']['passed']}/{security['summary']['total']}",
+            "reconciliation": f"{reconciliation['summary']['passed']}/{reconciliation['summary']['total']}",
+            "load": f"{load['success']}/{load['requests']}",
+            "p95_ms": load["latency_ms"]["p95"],
         },
         "screenshot_status": "用户提交项，目录和命名清单已准备",
         "demo_video": "按用户要求不制作",
