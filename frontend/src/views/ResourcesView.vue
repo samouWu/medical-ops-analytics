@@ -91,7 +91,7 @@ onMounted(async () => {
     <div v-if="data.cards.length" class="metrics-grid resource-metrics" :style="{ '--cols': data.cards.length }">
       <MetricCard v-for="(card, index) in data.cards" :key="card.key" :card="card" :index="index" />
     </div>
-    <p class="resource-note">床位使用率 = 实际占用床日 ÷ 开放床日；科室明细按编制床位（合计 375 张，来自 dim_department 教学配置）计算，全院卡片按实际开放床位 345 张（急诊科 30 张观察床不计入住院开放床位），两者口径不同，不能直接加权还原。床位周转次数 = 出院人次 ÷ 平均开放床位。</p>
+    <p class="resource-note">床位使用率 = 实际占用床日 ÷ 开放床日；科室明细按编制床位（合计 435 张，来自 dim_department 教学配置，其中重症医学科 80 张）计算，全院卡片按实际开放床位 345 张（差额为未开放/改造病区），两者口径不同，不能直接加权还原。床位周转次数 = 出院人次 ÷ 平均开放床位。</p>
 
     <div class="resource-charts">
       <section class="card">

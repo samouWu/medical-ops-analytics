@@ -76,6 +76,10 @@ def metric_summary(code, start, end, user, dept_code=None, conn=None):
         sql = "SELECT COUNT(*),COUNT(DISTINCT patient_key) FROM dwd_inpatient_stay WHERE discharge_date BETWEEN ? AND ? AND " + where
         total, patients = conn.execute(sql, [start, end, *params]).fetchone()
         values[code] = safe_ratio(total, patients)
+    elif code == "K40":
+        sql = "SELECT COUNT(*),SUM(visit_type='专家') FROM dwd_outpatient_visit WHERE visit_date BETWEEN ? AND ? AND " + where
+        total, expert = conn.execute(sql, [start, end, *params]).fetchone()
+        values["K40"] = safe_ratio(expert or 0, total, 100)
     elif code == "K09":
         sql = "SELECT COUNT(DISTINCT patient_key) FROM dwd_inpatient_stay WHERE admit_date<=? AND discharge_date>? AND " + where
         values[code] = conn.execute(sql, [end, end, *params]).fetchone()[0]
@@ -128,7 +132,7 @@ def metric_values(code, start, end, user, dept_code=None, grain="day"):
         raise ValueError("粒度仅支持day、week或month")
     with db_session() as conn:
         start, end = normalize_period(conn, start, end)
-        if grain in ("week", "month") or code in ("K09", "K25", "K26", "K27", "K28", "K29", "K31", "K32"):
+        if grain in ("week", "month") or code in ("K09", "K25", "K26", "K27", "K28", "K29", "K31", "K32", "K40"):
             days = [date.fromisoformat(row[0]) for row in conn.execute("SELECT DISTINCT stat_date FROM dws_dept_day WHERE stat_date BETWEEN ? AND ? ORDER BY 1", (start, end))]
             if not days:
                 return []
@@ -211,7 +215,7 @@ def analytics(topic, start, end, user, dept_code=None):
         start, end = normalize_period(conn, start, end)
         where, params = scope(user, dept_code)
         if topic in ("outpatient", "inpatient", "revenue"):
-            codes = {"outpatient": ("K01", "K37", "K19", "K06", "K02"), "inpatient": ("K08", "K38", "K13", "K12", "K20"), "revenue": ("K16", "K17", "K18", "K22", "K24")}[topic]
+            codes = {"outpatient": ("K01", "K02", "K40", "K37", "K19", "K06"), "inpatient": ("K08", "K38", "K13", "K12", "K20"), "revenue": ("K16", "K17", "K18", "K22", "K24")}[topic]
         elif topic == "drugs": codes = ("K21", "K22", "K16")
         elif topic == "consumables": codes = ("K23", "K24", "K16")
         elif topic == "disease": codes = ("K26", "K27", "K28", "K29")

@@ -10,10 +10,10 @@ def test_ratio_formula_examples():
     assert safe_ratio(1, 0, 100) is None
 
 
-def test_metric_catalog_has_39_unique_entries():
-    assert len(METRICS) == 39
-    assert len({row[0] for row in METRICS}) == 39
-    assert sum(bool(row[4]) for row in METRICS) == 30
+def test_metric_catalog_has_40_unique_entries():
+    assert len(METRICS) == 40
+    assert len({row[0] for row in METRICS}) == 40
+    assert sum(bool(row[4]) for row in METRICS) == 31
 
 
 def test_patient_identifier_is_one_way_and_stable():

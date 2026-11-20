@@ -70,7 +70,9 @@ def test_disease_cards_and_resource_order(client, admin_headers):
     resources = client.get("/api/v1/analytics/resources", headers=admin_headers).json()["data"]
     usages = [row["usage"] for row in resources["table"]["rows"]]
     assert usages == sorted(usages, reverse=True)
-    assert sum(row["beds"] for row in resources["table"]["rows"]) == 375
+    assert sum(row["beds"] for row in resources["table"]["rows"]) == 435
+    assert resources["table"]["rows"][-1]["name"] == "重症医学科"
+    assert 20 < resources["table"]["rows"][-1]["usage"] < 22
 
 
 def test_metric_values_and_unsupported(client, admin_headers):
@@ -101,7 +103,7 @@ def test_weekly_metric_values_and_ads_range_refresh(client, admin_headers):
     assert refresh.status_code == 200
     first_counts = {key: value["rows"] for key, value in refresh.json()["data"].items()}
     assert first_counts["week"] > 0
-    assert first_counts["month"] == 30*11
+    assert first_counts["month"] == 31*11
     repeated = client.post("/api/v1/etl/ads/refresh", headers=admin_headers, json={
         "start": "2025-05-01", "end": "2025-05-31", "grains": ["week", "month"],
     })

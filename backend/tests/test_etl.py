@@ -57,9 +57,9 @@ def test_theme_marts_dim_date_and_ads_grains():
         assert conn.execute("SELECT COUNT(*) FROM dim_date").fetchone()[0] == 91
         grains = {row[0] for row in conn.execute("SELECT DISTINCT grain FROM ads_metric_result")}
         assert grains == {"day", "week", "month"}
-        assert conn.execute("SELECT COUNT(*) FROM ads_metric_result WHERE grain='month'").fetchone()[0] == 990
-        assert conn.execute("SELECT COUNT(DISTINCT metric_code) FROM ads_metric_result").fetchone()[0] == 30
-        assert conn.execute("SELECT COUNT(*) FROM ads_metric_result").fetchone()[0] == 35640
+        assert conn.execute("SELECT COUNT(*) FROM ads_metric_result WHERE grain='month'").fetchone()[0] == 1023
+        assert conn.execute("SELECT COUNT(DISTINCT metric_code) FROM ads_metric_result").fetchone()[0] == 31
+        assert conn.execute("SELECT COUNT(*) FROM ads_metric_result").fetchone()[0] == 36828
         assert conn.execute("SELECT COUNT(value_num) FROM ads_metric_result WHERE metric_code='K25'").fetchone()[0] == 0
         sum_checks = {
             "dws_outpatient_day": ("visits", "outpatient_visits"),

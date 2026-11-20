@@ -199,7 +199,7 @@ BASE_ADS_CODES = (
     "K01", "K02", "K06", "K07", "K08", "K10", "K11", "K12", "K13", "K14",
     "K16", "K17", "K18", "K19", "K20", "K21", "K22", "K23", "K24", "K37", "K38", "K39",
 )
-EXTRA_ADS_CODES = ("K09", "K25", "K26", "K27", "K28", "K29", "K31", "K32")
+EXTRA_ADS_CODES = ("K09", "K25", "K26", "K27", "K28", "K29", "K31", "K32", "K40")
 ADS_CODES = BASE_ADS_CODES + EXTRA_ADS_CODES
 
 

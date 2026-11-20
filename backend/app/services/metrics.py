@@ -77,12 +77,14 @@ METRICS = [
      "K08 出院人次 ÷ COUNT(DISTINCT patient_key)（出院患者）"),
     ("K39", "检验结果异常率", "服务", "%", True, "异常或阳性检验报告数/检验报告总数×100%",
      "SUM(result_text IN ('异常','阳性')) ÷ COUNT(*) FROM dwd_lis_report × 100%"),
+    ("K40", "专家号占比", "门诊", "%", True, "专家号就诊人次占门诊人次的比例，反映门诊号别结构",
+     "COUNT(visit_type='专家') ÷ K01 门诊人次 × 100%"),
 ]
 METRIC_FIELDS = ("code", "name", "topic", "unit", "supported", "description", "formula")
 METRIC_MAP = {item[0]: dict(zip(METRIC_FIELDS, item)) for item in METRICS}
 
-# 全院实际开放床位：编制床位 375 张，其中急诊科 30 张为观察床，不计入住院开放床位。
-# 科室维度仍按 dim_department.bed_count（编制床位）计算，全院口径按本常量复算，保证与示范平台一致且可追溯。
+# 全院实际开放床位（运行床位）345 张：编制床位合计 435 张，差额为未开放/改造病区，按教学配置处理。
+# 科室维度按 dim_department.bed_count（编制床位）计算，全院床位使用率按实际开放床位复算，两者分母不同、不可直接加权还原。
 ACTUAL_OPEN_BEDS = 345
 
 # 以“元”为单位的金额类指标，前端统一按万元展示。

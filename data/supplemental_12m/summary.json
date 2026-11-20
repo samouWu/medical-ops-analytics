@@ -58,7 +58,7 @@
   "etl": {
     "sources": [
       {
-        "batch_id": "35aaf1848a134931a7f2280ee3b9b220",
+        "batch_id": "ab6999ad06674df0898216bde346817c",
         "source_table": "his_outpatient",
         "row_count": 35017,
         "error_count": 0,
@@ -68,7 +68,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "31061f72fe2c4316a031092d09030c88",
+        "batch_id": "e3ebdff075dd4df59c37686e12c183ca",
         "source_table": "his_inpatient",
         "row_count": 6005,
         "error_count": 0,
@@ -78,7 +78,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "74ee339c70de4d36a5f0ee8aee01940a",
+        "batch_id": "c9f69a70536c404b8fa1e1492b3a525e",
         "source_table": "his_charge",
         "row_count": 173412,
         "error_count": 0,
@@ -88,7 +88,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "564e1856d9ae43ed94b97bca378ca9ba",
+        "batch_id": "2dbaa98d764d42ed919c71d59e29988e",
         "source_table": "emr_record",
         "row_count": 6005,
         "error_count": 0,
@@ -98,7 +98,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "051c80728869402286ee500ad22bca09",
+        "batch_id": "b428cb6c1d824f5299716668533a8646",
         "source_table": "lis_report",
         "row_count": 11939,
         "error_count": 0,
@@ -108,7 +108,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "3016a5cf45674eebb6a15bc124fafac4",
+        "batch_id": "168336ce1de342c595f164c86ac98eec",
         "source_table": "finance_excel",
         "row_count": 3650,
         "error_count": 0,
@@ -134,17 +134,17 @@
     },
     "ads": {
       "day": {
-        "rows": 120450,
+        "rows": 124465,
         "start": "2025-04-01",
         "end": "2026-03-31"
       },
       "week": {
-        "rows": 17490,
+        "rows": 18073,
         "start": "2025-03-31",
         "end": "2026-04-05"
       },
       "month": {
-        "rows": 3960,
+        "rows": 4092,
         "start": "2025-04-01",
         "end": "2026-03-31"
       }
@@ -244,11 +244,11 @@
       }
     ],
     "ads_grains": {
-      "day": 120450,
-      "month": 3960,
-      "week": 17490
+      "day": 124465,
+      "month": 4092,
+      "week": 18073
     },
     "theme_rows": 3650,
-    "metric_definitions": 39
+    "metric_definitions": 40
   }
 }
