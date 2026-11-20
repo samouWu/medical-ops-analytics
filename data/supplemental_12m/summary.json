@@ -58,7 +58,7 @@
   "etl": {
     "sources": [
       {
-        "batch_id": "f084e0238aba4e3b9c4a51a53d27d724",
+        "batch_id": "35aaf1848a134931a7f2280ee3b9b220",
         "source_table": "his_outpatient",
         "row_count": 35017,
         "error_count": 0,
@@ -68,7 +68,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "18b3c5da6f8047abb0ddc64c9152e293",
+        "batch_id": "31061f72fe2c4316a031092d09030c88",
         "source_table": "his_inpatient",
         "row_count": 6005,
         "error_count": 0,
@@ -78,7 +78,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "38b3c8bc139846f7a8d6b7b085eaf946",
+        "batch_id": "74ee339c70de4d36a5f0ee8aee01940a",
         "source_table": "his_charge",
         "row_count": 173412,
         "error_count": 0,
@@ -88,7 +88,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "ba94e144015c45558993c0005c5ef2a5",
+        "batch_id": "564e1856d9ae43ed94b97bca378ca9ba",
         "source_table": "emr_record",
         "row_count": 6005,
         "error_count": 0,
@@ -98,7 +98,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "4f300dba3107467c9fe1ba8312ec52f6",
+        "batch_id": "051c80728869402286ee500ad22bca09",
         "source_table": "lis_report",
         "row_count": 11939,
         "error_count": 0,
@@ -108,7 +108,7 @@
         "attempts": 1
       },
       {
-        "batch_id": "9a35fd23564b48ddb44c22c5ffe67ba4",
+        "batch_id": "3016a5cf45674eebb6a15bc124fafac4",
         "source_table": "finance_excel",
         "row_count": 3650,
         "error_count": 0,

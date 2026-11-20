@@ -119,7 +119,7 @@ const tone = computed(() => ['blue', 'teal', 'orange', 'purple'][props.index % 4
   gap: 5px;
   margin-top: 12px;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .metric-indicator {

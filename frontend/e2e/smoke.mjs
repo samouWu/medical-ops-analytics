@@ -36,7 +36,10 @@ try {
   await page.getByRole('button', { name: '按周' }).click()
   await page.waitForTimeout(1200)
   record('指标查询页与按周切换', await page.getByText(/个数据点/).isVisible().catch(() => false))
-  record('指标目录只展示可计算指标', await page.locator('.catalog-code').count() === 30, `count=${await page.locator('.catalog-code').count()}`)
+  const catalogCount = await page.locator('.catalog-code').count()
+  record('指标目录只展示当前可计算指标', catalogCount === 29, `count=${catalogCount}`)
+  const formula = await page.locator('.definition-formula code').first().innerText().catch(() => '')
+  record('指标定义展示计算公式', formula.length > 4, formula.slice(0, 40))
 
   await page.goto(`${BASE}/reports/multidimensional`, { waitUntil: 'domcontentloaded' })
   await page.getByText('报表配置').waitFor()

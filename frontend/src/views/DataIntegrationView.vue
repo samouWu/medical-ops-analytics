@@ -185,7 +185,7 @@ onMounted(fetchJobs)
 .banner-copy h2 { color: #2c4968; font-size: 14px; font-weight: 600; }
 .banner-copy p { margin-top: 6px; color: #748ba5; font-size: 11px; line-height: 1.6; }
 .file-types { display: flex; gap: 5px; }
-.file-types span { padding: 5px 7px; color: #6d88a6; font-size: 9px; background: #fff; border: 1px solid #dce6f1; border-radius: 5px; }
+.file-types span { padding: 5px 7px; color: #6d88a6; font-size: 10px; background: #fff; border: 1px solid #dce6f1; border-radius: 5px; }
 
 .integration-stats {
   display: grid;
@@ -216,15 +216,15 @@ onMounted(fetchJobs)
 .stat-icon.purple { color: #7864cc; background: #f2effc; }
 .integration-stats p { color: var(--text-secondary); font-size: 11px; }
 .integration-stats strong { display: block; margin-top: 5px; color: #246fcf; font-size: 23px; font-weight: 600; }
-.integration-stats small { margin-left: 5px; color: var(--text-muted); font-size: 10px; font-weight: 400; }
+.integration-stats small { margin-left: 5px; color: var(--text-muted); font-size: 11px; font-weight: 400; }
 
 .jobs-card { overflow: hidden; }
 .job-name { display: flex; align-items: center; gap: 9px; }
 .job-name > span { display: grid; width: 30px; height: 30px; place-items: center; color: var(--primary); background: var(--primary-soft); border-radius: 7px; }
 .job-name > div { display: flex; flex-direction: column; gap: 4px; }
 .job-name strong { color: #3a526d; font-size: 12px; font-weight: 550; }
-.job-name small { color: var(--text-muted); font-size: 9px; }
-.table-name { padding: 4px 7px; color: #56728f; font-size: 10px; background: #f3f6f9; border-radius: 4px; }
+.job-name small { color: var(--text-muted); font-size: 10px; }
+.table-name { padding: 4px 7px; color: #56728f; font-size: 11px; background: #f3f6f9; border-radius: 4px; }
 .schedule-cell { display: flex; align-items: center; gap: 5px; color: #667e96; }
 .integration-message .spinner,
 .jobs-card .spinner { width: 13px; height: 13px; }

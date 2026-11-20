@@ -209,7 +209,7 @@ onBeforeUnmount(() => {
 .date-nav:hover { background: #f2f6fb; color: var(--primary); }
 .nav-prev { transform: rotate(180deg); }
 .date-weekdays, .date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-.date-weekdays { margin-bottom: 3px; color: #9aa8b8; font-size: 10px; text-align: center; }
+.date-weekdays { margin-bottom: 3px; color: #9aa8b8; font-size: 11px; text-align: center; }
 .date-cell, .month-cell { height: 29px; padding: 0; color: #40566f; font-size: 11px; background: transparent; border: 0; border-radius: 5px; cursor: pointer; }
 .date-cell:hover:not(:disabled), .month-cell:hover:not(:disabled) { color: var(--primary); background: #eef4fe; }
 .date-cell.selected, .month-cell.selected { color: #fff; font-weight: 600; background: var(--primary); }
@@ -218,6 +218,6 @@ onBeforeUnmount(() => {
 .month-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px 0; }
 .month-cell { height: 34px; }
 .date-popover-footer { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 7px; border-top: 1px solid #edf1f5; }
-.date-popover-footer button { padding: 2px 3px; color: #7e8fa2; font-size: 10px; background: transparent; cursor: pointer; }
+.date-popover-footer button { padding: 2px 3px; color: #7e8fa2; font-size: 11px; background: transparent; cursor: pointer; }
 .date-popover-footer .today-link { color: var(--primary); }
 </style>

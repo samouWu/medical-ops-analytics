@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import MedicalDecor from '../components/MedicalDecor.vue'
 import { clearSession, getStoredUser } from '../stores/auth'
 import { appState, loadMeta } from '../stores/app'
 
@@ -100,6 +101,10 @@ function logout() {
           </RouterLink>
         </div>
       </nav>
+
+      <div class="sidebar-decor">
+        <MedicalDecor variant="sidebar" />
+      </div>
 
       <div class="sidebar-footer">
         <div class="sidebar-avatar">{{ (user.display_name || user.username || '用').slice(0, 1) }}</div>
@@ -222,7 +227,7 @@ function logout() {
 .brand-copy small {
   margin-top: 4px;
   color: #7e9ab5;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 500;
   letter-spacing: 1.2px;
 }
@@ -243,7 +248,7 @@ function logout() {
 .nav-group-label {
   padding: 9px 12px 7px;
   color: #7792ad;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 1.2px;
 }
@@ -296,6 +301,11 @@ function logout() {
   background: #9cc5ff;
 }
 
+.sidebar-decor {
+  padding: 0 16px 6px;
+  overflow: hidden;
+}
+
 .sidebar-footer {
   display: flex;
   align-items: center;
@@ -342,7 +352,7 @@ function logout() {
 .sidebar-user span {
   margin-top: 4px;
   color: #7996b1;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .sidebar-logout {

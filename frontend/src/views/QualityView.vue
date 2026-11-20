@@ -178,7 +178,7 @@ onMounted(fetchQuality)
 .score-info p {
   margin-top: 16px;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 2;
 }
 
@@ -235,14 +235,14 @@ onMounted(fetchQuality)
 .quality-stat strong small {
   margin-left: 5px;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
 }
 
 .quality-stat p {
   margin-top: 5px;
   color: var(--text-muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .quality-table-card {

@@ -191,6 +191,7 @@ onMounted(async () => {
         <div><h2 class="card-heading">报表结果</h2><p class="card-subheading">查询结果按所选指标与维度展示</p></div>
         <span v-if="result" class="status-badge">{{ rows.length }} 条记录</span>
       </div>
+      <p v-if="result?.note" class="result-note"><AppIcon name="alert" :size="14" />{{ result.note }}</p>
       <StateBlock v-if="!hasQueried && !querying" title="开始构建您的报表" description="选择指标和维度后，点击生成报表查看结果" />
       <DataTable v-else :columns="columns" :rows="rows" :loading="querying" :page-size="12" />
     </section>
@@ -228,7 +229,7 @@ onMounted(async () => {
   height: 21px;
   place-items: center;
   color: var(--primary);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   background: var(--primary-soft);
   border-radius: 50%;
@@ -242,7 +243,7 @@ onMounted(async () => {
 
 .builder-label small {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .metric-search {
@@ -342,14 +343,14 @@ onMounted(async () => {
   margin-top: 4px;
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 9px;
+  font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .metric-option em {
   color: var(--text-muted);
-  font-size: 9px;
+  font-size: 10px;
   font-style: normal;
 }
 
@@ -418,6 +419,19 @@ onMounted(async () => {
 
 .query-error .btn {
   margin-left: auto;
+}
+
+.result-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 20px 12px;
+  padding: 8px 11px;
+  color: #8a6218;
+  font-size: 12px;
+  background: var(--warning-soft);
+  border: 1px solid #f6e3bf;
+  border-radius: 7px;
 }
 
 .query-notice {

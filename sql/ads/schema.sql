@@ -18,5 +18,6 @@ CREATE TABLE IF NOT EXISTS metric_definition (
     topic TEXT NOT NULL,
     unit TEXT NOT NULL,
     supported INTEGER NOT NULL,
-    description TEXT NOT NULL
+    description TEXT NOT NULL,
+    formula TEXT NOT NULL DEFAULT ''
 );

@@ -208,8 +208,16 @@ def test_multidimensional_report_and_audit(client, admin_headers):
     data = response.json()["data"]
     assert len(data["rows"]) == 30
     column_keys = {column["key"] for column in data["columns"]}
-    assert {"K01_yoy", "K01_mom", "K16_yoy", "K16_mom"} <= column_keys
+    # 无上年同期数据时同比列整列为空，应被隐藏；环比有对照期则保留。
+    assert "K01_yoy" not in column_keys
+    assert {"K01_mom", "K16_mom"} <= column_keys
+    assert "同比" in data["note"]
     assert any(row["K01_mom"] is not None for row in data["rows"] if row["date"] > "2025-04")
+    # 只选科室维度时，同比/环比都无对照期，两列都应隐藏
+    dept_payload = {"metrics": ["K01"], "dimensions": ["dept_code"], "filters": {}, "grain": "day", "comparisons": ["yoy", "mom"]}
+    dept_data = client.post("/api/v1/reports/query", headers=admin_headers, json=dept_payload).json()["data"]
+    assert dept_data["dropped_comparisons"] == ["同比", "环比"]
+    assert [column["key"] for column in dept_data["columns"]] == ["date", "dept_name", "K01"]
     excel = client.post("/api/v1/reports/query/export", headers=admin_headers, json=payload)
     assert excel.status_code == 200
     assert excel.content[:2] == b"PK"

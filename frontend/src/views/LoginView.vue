@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import MedicalDecor from '../components/MedicalDecor.vue'
 import { request } from '../api/client'
 import { saveSession } from '../stores/auth'
 import { errorMessage } from '../utils/format'
@@ -66,6 +67,7 @@ async function login() {
           </div>
         </div>
       </div>
+      <MedicalDecor variant="brand" />
       <div class="brand-footer">统一数据 · 统一指标 · 统一洞察</div>
     </section>
 
@@ -196,7 +198,7 @@ async function login() {
 .login-brand > div span {
   margin-top: 5px;
   color: #84a2bf;
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 1.5px;
 }
 
@@ -280,7 +282,7 @@ async function login() {
   position: relative;
   z-index: 1;
   color: #607f9d;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 2px;
 }
 
@@ -301,7 +303,7 @@ async function login() {
 
 .login-welcome {
   color: var(--primary);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 2px;
 }
@@ -444,14 +446,14 @@ async function login() {
   gap: 5px;
   margin-top: 23px;
   color: #9aa8b8;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .login-footer {
   position: absolute;
   bottom: 25px;
   color: #a1aebb;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .mobile-login-brand {

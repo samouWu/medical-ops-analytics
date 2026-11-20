@@ -10,7 +10,7 @@ from app.core.database import audit, db_session
 from app.core.security import current_user
 from app.schemas import ReportQuery
 from app.services.analytics import analytics, management, metric_summary, metric_values, normalize_period
-from app.services.metrics import METRIC_MAP, METRICS
+from app.services.metrics import DATA_GAPS, METRIC_FIELDS, METRIC_MAP, METRICS
 
 router = APIRouter(tags=["运营分析"])
 
@@ -54,15 +54,22 @@ def topic(topic: str, start: str | None = None, end: str | None = None, dept_cod
 
 
 @router.get("/metrics")
-def metrics(topic: str | None = None, keyword: str | None = None, include_unsupported: bool = False, user: dict = Depends(current_user)):
+def metrics(topic: str | None = None, keyword: str | None = None, include_unsupported: bool = False, include_unavailable: bool = False, user: dict = Depends(current_user)):
     result = []
     for item in METRICS:
-        entry = dict(zip(("code", "name", "topic", "unit", "supported", "description"), item))
-        if not include_unsupported and not entry["supported"]:
+        entry = dict(zip(METRIC_FIELDS, item))
+        entry["available"] = entry["supported"] and entry["code"] not in DATA_GAPS
+        entry["gap_reason"] = DATA_GAPS.get(entry["code"], "")
+        if include_unsupported:
+            pass
+        elif not entry["supported"]:
+            continue
+        elif not include_unavailable and not entry["available"]:
+            # 口径已实现但当前数据集无数据的指标，默认不出现在查询目录。
             continue
         if topic and entry["topic"] != topic:
             continue
-        if keyword and keyword.lower() not in (entry["name"]+entry["description"]).lower():
+        if keyword and keyword.lower() not in (entry["name"]+entry["description"]+entry["formula"]).lower():
             continue
         result.append(entry)
     return ok(result)
@@ -168,10 +175,18 @@ def _build_multi_report(payload, user):
     if "dept_code" in payload.dimensions:
         columns.append({"key": "dept_name", "label": "科室"})
     columns += [{"key": code, "label": f"{METRIC_MAP[code]['name']}（{METRIC_MAP[code]['unit']}）", "format": "money" if METRIC_MAP[code]["unit"].startswith("元") else "percent" if METRIC_MAP[code]["unit"] == "%" else "number"} for code in payload.metrics]
+    dropped = []
     for comparison in payload.comparisons:
         suffix = "同比" if comparison == "yoy" else "环比"
-        columns += [{"key": f"{code}_{comparison}", "label": f"{METRIC_MAP[code]['name']}{suffix}", "format": "percent"} for code in payload.metrics]
-    return {"columns": columns, "rows": rows, "period": {"start": start, "end": end}, "grain": payload.grain}
+        keys = [f"{code}_{comparison}" for code in payload.metrics]
+        if rows and all(row.get(key) is None for row in rows for key in keys):
+            # 所选区间没有上期数据时整列为空，直接不返回该列，避免表格被“—”占满。
+            dropped.append(suffix)
+            continue
+        columns += [{"key": key, "label": f"{METRIC_MAP[code]['name']}{suffix}", "format": "percent"} for code, key in zip(payload.metrics, keys)]
+    note = f"所选区间缺少{'、'.join(dropped)}对照期数据，已隐藏对应列" if dropped else ""
+    return {"columns": columns, "rows": rows, "period": {"start": start, "end": end}, "grain": payload.grain,
+            "dropped_comparisons": dropped, "note": note}
 
 
 @router.post("/reports/query")

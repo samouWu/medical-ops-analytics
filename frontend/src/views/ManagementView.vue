@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import PageHeader from '../components/PageHeader.vue'
 import FilterBar from '../components/FilterBar.vue'
 import MetricCard from '../components/MetricCard.vue'
+import MedicalDecor from '../components/MedicalDecor.vue'
 import LineChart from '../components/charts/LineChart.vue'
 import BarChart from '../components/charts/BarChart.vue'
 import StateBlock from '../components/StateBlock.vue'
@@ -59,7 +60,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page">
+  <div class="page dashboard-page">
+    <MedicalDecor variant="header" class="dashboard-header-decor" />
     <PageHeader title="管理驾驶舱" description="聚合核心运营指标，纵览全院医疗服务与经营态势">
       <template #actions>
         <button v-if="filters.dept_code" class="btn" :disabled="loading" @click="resetDrill">
@@ -142,6 +144,21 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.dashboard-page {
+  position: relative;
+}
+
+.dashboard-header-decor {
+  position: absolute;
+  top: 16px;
+  right: 196px;
+  pointer-events: none;
+}
+
+@media (max-width: 1180px) {
+  .dashboard-header-decor { display: none; }
+}
+
 .dashboard-error {
   display: flex;
   align-items: center;

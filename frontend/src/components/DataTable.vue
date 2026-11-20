@@ -109,7 +109,8 @@ function getRowKey(row, index) {
 
 .data-table {
   width: 100%;
-  font-size: 12px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
   border-collapse: collapse;
   border-spacing: 0;
 }
@@ -117,8 +118,8 @@ function getRowKey(row, index) {
 .data-table th {
   height: 42px;
   padding: 10px 16px;
-  color: #71849a;
-  font-size: 11px;
+  color: #6b7f96;
+  font-size: 12px;
   font-weight: 550;
   text-align: left;
   white-space: nowrap;

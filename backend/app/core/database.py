@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS ads_metric_result (
 );
 CREATE TABLE IF NOT EXISTS metric_definition (
  code TEXT PRIMARY KEY, name TEXT NOT NULL, topic TEXT NOT NULL, unit TEXT NOT NULL,
- supported INTEGER NOT NULL, description TEXT NOT NULL
+ supported INTEGER NOT NULL, description TEXT NOT NULL, formula TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS app_user (
  username TEXT PRIMARY KEY, display_name TEXT NOT NULL, password_hash TEXT NOT NULL,
@@ -229,10 +229,14 @@ def init_db() -> None:
     from app.services.metrics import METRICS
     with db_session() as conn:
         conn.executescript(SCHEMA)
+        # 旧库平滑升级：metric_definition 增加 formula 列，历史库通过 ALTER 补齐。
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(metric_definition)")}
+        if "formula" not in columns:
+            conn.execute("ALTER TABLE metric_definition ADD COLUMN formula TEXT NOT NULL DEFAULT ''")
         conn.executemany("INSERT OR REPLACE INTO dim_department VALUES (?,?,?,?,?)", [(*row, "待业务确认") for row in DEPARTMENTS])
         conn.executemany("INSERT OR REPLACE INTO dim_disease VALUES (?,?)", DISEASES)
         conn.executemany("INSERT OR REPLACE INTO dim_fee_type VALUES (?,?,?)", FEE_TYPES)
-        conn.executemany("INSERT OR REPLACE INTO metric_definition VALUES (?,?,?,?,?,?)", METRICS)
+        conn.executemany("INSERT OR REPLACE INTO metric_definition VALUES (?,?,?,?,?,?,?)", METRICS)
         if conn.execute("SELECT COUNT(*) FROM app_user").fetchone()[0] == 0:
             users = [
                 ("admin", "系统管理员", hash_password("admin123"), "admin", "[]"),

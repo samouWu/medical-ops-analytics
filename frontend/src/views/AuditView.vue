@@ -125,7 +125,7 @@ onMounted(fetchLogs)
 .audit-stat { display: flex; align-items: center; justify-content: space-between; padding: 18px; }
 .audit-stat > span { color: var(--text-secondary); font-size: 11px; }
 .audit-stat strong { color: #246fcf; font-size: 25px; font-weight: 600; }
-.audit-stat small { margin-left: 4px; color: var(--text-muted); font-size: 10px; font-weight: 400; }
+.audit-stat small { margin-left: 4px; color: var(--text-muted); font-size: 11px; font-weight: 400; }
 
 .audit-card { overflow: hidden; }
 .audit-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
@@ -135,10 +135,10 @@ onMounted(fetchLogs)
 .audit-filters .form-control { width: 125px; height: 36px; font-size: 11px; }
 .time-cell { display: flex; align-items: center; gap: 5px; color: #6c8299; }
 .user-cell { display: flex; align-items: center; gap: 7px; }
-.user-cell > span { display: grid; width: 25px; height: 25px; place-items: center; color: #3978bd; font-size: 10px; background: #eaf2fb; border-radius: 50%; }
-.resource-cell { display: block; max-width: 220px; overflow: hidden; color: #4e6a88; font-size: 10px; text-overflow: ellipsis; }
+.user-cell > span { display: grid; width: 25px; height: 25px; place-items: center; color: #3978bd; font-size: 11px; background: #eaf2fb; border-radius: 50%; }
+.resource-cell { display: block; max-width: 220px; overflow: hidden; color: #4e6a88; font-size: 11px; text-overflow: ellipsis; }
 .detail-cell { display: block; max-width: 310px; overflow: hidden; text-overflow: ellipsis; }
-.trace-cell { display: block; max-width: 190px; overflow: hidden; color: #8496aa; font-size: 10px; text-overflow: ellipsis; }
+.trace-cell { display: block; max-width: 190px; overflow: hidden; color: #8496aa; font-size: 11px; text-overflow: ellipsis; }
 
 @media (max-width: 1100px) {
   .audit-summary { grid-template-columns: 1fr 150px 150px; }

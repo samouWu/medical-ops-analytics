@@ -228,7 +228,7 @@ onMounted(async () => {
   gap: 5px;
   margin-top: 5px;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .chat-header p span {
@@ -324,7 +324,7 @@ onMounted(async () => {
   margin-top: 11px;
   padding-top: 9px;
   color: var(--text-muted);
-  font-size: 9px;
+  font-size: 10px;
   border-top: 1px solid #edf1f5;
 }
 
@@ -335,7 +335,7 @@ onMounted(async () => {
   gap: 6px;
   margin-top: 8px;
   color: var(--danger);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .answer-error button {
@@ -431,7 +431,7 @@ onMounted(async () => {
 .chat-input-area > p {
   margin-top: 7px;
   color: #a0adbb;
-  font-size: 9px;
+  font-size: 10px;
   text-align: center;
 }
 
@@ -472,7 +472,7 @@ onMounted(async () => {
 .example-list button > span {
   color: #a2b4c8;
   font-family: monospace;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .example-list button p {
@@ -537,12 +537,12 @@ onMounted(async () => {
 
 .current-scope span {
   color: var(--text-muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .current-scope strong {
   color: #587089;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
 }
 

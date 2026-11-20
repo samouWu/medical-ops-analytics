@@ -110,7 +110,7 @@ onMounted(async () => {
 
     <div class="metrics-layout">
       <aside class="card metric-catalog">
-        <div class="card-header"><div><h2 class="card-heading">指标目录</h2><p class="card-subheading">共 {{ metrics.length }} 项指标</p></div><AppIcon name="metrics" :size="18" /></div>
+        <div class="card-header"><div><h2 class="card-heading">指标目录</h2><p class="card-subheading">共 {{ metrics.length }} 项可查指标</p></div><AppIcon name="metrics" :size="18" /></div>
         <div class="catalog-filters">
           <div class="catalog-search"><AppIcon name="search" :size="15" /><input v-model="search" placeholder="搜索指标"></div>
           <select v-model="topicFilter" class="form-control" aria-label="指标主题"><option value="">全部主题</option><option v-for="topic in topics" :key="topic" :value="topic">{{ topic }}</option></select>
@@ -133,6 +133,10 @@ onMounted(async () => {
             <div class="definition-main">
               <div class="definition-title"><h2>{{ selectedMetric.name }}</h2><span class="status-badge info">{{ selectedMetric.code }}</span><span v-if="selectedMetric.unit" class="status-badge">单位：{{ selectedMetric.unit }}</span></div>
               <p>{{ selectedMetric.description || '该指标暂无补充口径说明' }}</p>
+              <div v-if="selectedMetric.formula" class="definition-formula">
+                <span class="formula-label">计算公式</span>
+                <code>{{ selectedMetric.formula }}</code>
+              </div>
             </div>
             <div class="definition-query">
               <div class="segmented"><button :class="{ active: grain === 'day' }" @click="grain = 'day'">按日</button><button :class="{ active: grain === 'week' }" @click="grain = 'week'">按周</button><button :class="{ active: grain === 'month' }" @click="grain = 'month'">按月</button></div>
@@ -160,6 +164,7 @@ onMounted(async () => {
                 :loading="loadingValues"
               />
             </div>
+            <p v-if="points.length" class="chart-note">数据截止日按源数据结算，期末在院患者为 0，床位使用率、出院人次等指标在最后一天会出现边界波动，属数据边界而非计算错误。</p>
           </div>
         </section>
 
@@ -168,6 +173,7 @@ onMounted(async () => {
           <DataTable :columns="pointColumns" :rows="points" :loading="loadingValues" :page-size="8">
             <template #cell-value="{ value }"><strong class="point-value">{{ formatPointValue(value) }}</strong></template>
           </DataTable>
+          <p class="points-note">“—”表示该时点无分母可算（如当日无出院人次），不是数据缺失；指标值由 ADS 与统一指标服务同口径计算。</p>
         </section>
       </div>
     </div>
@@ -261,7 +267,7 @@ onMounted(async () => {
 
 .catalog-item-top em {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
   font-style: normal;
 }
 
@@ -269,7 +275,7 @@ onMounted(async () => {
   margin-top: 5px;
   color: var(--text-muted);
   font-family: monospace;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .catalog-topic {
@@ -277,7 +283,7 @@ onMounted(async () => {
   justify-content: space-between;
   margin-top: 8px;
   color: #8194a9;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .catalog-topic i {
@@ -338,6 +344,47 @@ onMounted(async () => {
 .definition-main > p {
   margin-top: 7px;
   color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.definition-formula {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 8px 11px;
+  background: #f6f9fe;
+  border: 1px solid #e6eefb;
+  border-radius: 7px;
+}
+
+.formula-label {
+  color: #5b7392;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.definition-formula code {
+  color: #24507f;
+  font-family: "Cascadia Mono", "JetBrains Mono", Consolas, "Microsoft YaHei", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.chart-note {
+  margin: 2px 2px 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.points-note {
+  margin: 10px 2px 0;
+  color: var(--text-muted);
   font-size: 11px;
   line-height: 1.6;
 }

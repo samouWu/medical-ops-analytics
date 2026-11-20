@@ -176,7 +176,7 @@ onMounted(async () => {
 .control-field > label,
 .control-field > span {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .control-field .form-control {
@@ -232,7 +232,7 @@ onMounted(async () => {
 .report-label {
   margin-top: 18px;
   color: #86a0bd;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 2px;
 }
 
@@ -261,7 +261,7 @@ onMounted(async () => {
 .report-generated {
   margin-top: 10px;
   color: #9aa9b9;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .report-sections {
@@ -313,7 +313,7 @@ onMounted(async () => {
   margin-top: 12px;
   padding: 8px 10px;
   color: #71849a;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.6;
   background: #f6f9fc;
   border-radius: 5px;
@@ -325,7 +325,7 @@ onMounted(async () => {
   gap: 20px;
   padding: 16px 30px;
   color: #9baaba;
-  font-size: 9px;
+  font-size: 10px;
   background: #f8fafc;
   border-top: 1px solid var(--border);
 }
