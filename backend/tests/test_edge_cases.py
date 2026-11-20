@@ -13,6 +13,11 @@ def test_api_error_and_validation_branches(client, admin_headers):
     assert client.get("/api/v1/dashboards/unknown", headers=admin_headers).status_code == 404
     assert client.get("/api/v1/dashboards/department", headers=admin_headers).status_code == 200
     assert client.get("/api/v1/dashboards/topic", headers=admin_headers).status_code == 200
+    visible_metrics = client.get("/api/v1/metrics", headers=admin_headers).json()["data"]
+    assert len(visible_metrics) == 30
+    assert all(item["supported"] for item in visible_metrics)
+    all_metrics = client.get("/api/v1/metrics?include_unsupported=true", headers=admin_headers).json()["data"]
+    assert len(all_metrics) == 39
     assert client.get("/api/v1/metrics?topic=门诊&keyword=床位", headers=admin_headers).status_code == 200
     assert client.get("/api/v1/metrics?topic=不存在", headers=admin_headers).json()["data"] == []
     assert client.get("/api/v1/metrics/K999/values", headers=admin_headers).status_code == 400

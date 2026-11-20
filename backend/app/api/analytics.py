@@ -54,10 +54,12 @@ def topic(topic: str, start: str | None = None, end: str | None = None, dept_cod
 
 
 @router.get("/metrics")
-def metrics(topic: str | None = None, keyword: str | None = None, user: dict = Depends(current_user)):
+def metrics(topic: str | None = None, keyword: str | None = None, include_unsupported: bool = False, user: dict = Depends(current_user)):
     result = []
     for item in METRICS:
         entry = dict(zip(("code", "name", "topic", "unit", "supported", "description"), item))
+        if not include_unsupported and not entry["supported"]:
+            continue
         if topic and entry["topic"] != topic:
             continue
         if keyword and keyword.lower() not in (entry["name"]+entry["description"]).lower():

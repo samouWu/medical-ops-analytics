@@ -34,6 +34,13 @@ def test_all_theme_endpoints(client, admin_headers):
         response = client.get(f"/api/v1/analytics/{topic}", headers=admin_headers)
         assert response.status_code == 200, topic
         assert "cards" in response.json()["data"]
+    resources = client.get("/api/v1/analytics/resources", headers=admin_headers).json()["data"]
+    assert len(resources["table"]["rows"]) == 10
+    assert len(resources["distribution"]) == 10
+    assert len(resources["secondary_distribution"]) == 10
+    assert len(resources["trends"]) > 0
+    assert resources["table"]["rows"][0]["usage"] is not None
+    assert resources["table"]["rows"][0]["turnover"] is not None
 
 
 def test_metric_values_and_unsupported(client, admin_headers):
