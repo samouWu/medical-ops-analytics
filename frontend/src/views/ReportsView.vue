@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import PageHeader from '../components/PageHeader.vue'
 import AppIcon from '../components/AppIcon.vue'
 import StateBlock from '../components/StateBlock.vue'
+import DatePicker from '../components/DatePicker.vue'
 import { request } from '../api/client'
 import { appState, loadMeta } from '../stores/app'
 import { errorMessage, formatDateTime } from '../utils/format'
@@ -86,7 +87,7 @@ onMounted(async () => {
       <div class="control-intro"><span><AppIcon name="report" :size="21" /></span><div><h2>运营分析报告</h2><p>选择报告周期，系统将自动汇总并生成分析内容</p></div></div>
       <div class="control-fields">
         <div class="control-field"><label>报告类型</label><div class="segmented"><button :class="{ active: period === 'month' }" @click="changePeriod('month')">月度报告</button><button :class="{ active: period === 'week' }" @click="changePeriod('week')">周度报告</button></div></div>
-        <label class="control-field"><span>统计周期</span><input v-if="period === 'month'" v-model="date" class="form-control" type="month" :min="minDate.slice(0, 7)" :max="maxDate.slice(0, 7)"><input v-else v-model="date" class="form-control" type="date" :min="minDate" :max="maxDate"></label>
+        <label class="control-field"><span>统计周期</span><DatePicker v-model="date" :mode="period === 'month' ? 'month' : 'date'" :min="period === 'month' ? minDate.slice(0, 7) : minDate" :max="period === 'month' ? maxDate.slice(0, 7) : maxDate" /></label>
         <button class="btn btn-primary" :disabled="loading || !date" @click="generate"><span v-if="loading" class="spinner" /><AppIcon v-else name="report" :size="15" />{{ loading ? '正在生成' : '生成报告' }}</button>
       </div>
     </section>

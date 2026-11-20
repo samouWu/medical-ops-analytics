@@ -9,7 +9,7 @@
   <Box style={{ flexDirection: 'row', gap: 24, height: 370, marginTop: 16 }}>
     <Box style={{ width: 566, background: '#F0F5FC', border: '1px solid #C9DCF5', borderRadius: 10, padding: 22 }}>
       <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#0E3F8C' }}>本轮已实现</Text>
-      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.55 }}>六源加工；25张DDL与DWD宽表；8主题DWS；30项ADS三粒度；axios与5图表组件；图表下钻、同环比、系统CRUD；安全只读SQL、知识问答；30项测试、E2E9/9、安全13/13、对账11/11、负载120/120。</Text>
+      <Text style={{ fontSize: 19, color: '#1A2230', lineHeight: 1.55 }}>六源加工；25张DDL与DWD宽表；8主题DWS；30项ADS三粒度；axios与5图表组件；图表下钻、同环比、系统CRUD；安全只读SQL、知识问答；35项测试、E2E10/10、安全13/13、对账11/11、负载120/120。</Text>
       <Box style={{ background: '#FFFFFF', borderRadius: 6, padding: 12 }}>
         <Text style={{ fontSize: 18, color: '#1E4FA8' }}>可用于课程演示和技术评审。</Text>
       </Box>
@@ -18,7 +18,7 @@
     <Box style={{ width: 570, background: '#FFF8E1', border: '1px solid #FFE082', borderRadius: 10, padding: 22 }}>
       <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#7A4F00' }}>未完成/未验证</Text>
       <Text style={{ fontSize: 19, color: '#5D4037', lineHeight: 1.55 }}>
-        默认主题12个月接入（附加库已验证）；真实Key模型SQL；Docker实测；生产容量梯度；渗透/限流/依赖漏洞；Canvas点击与下载人工验收；正式试运行、培训与签字。
+        默认主题12个月接入（附加库已验证）；再补5类图表与独立科室看板；质量异常告警闭环；真实Key模型SQL；Docker实测；生产容量与渗透；Canvas点击与下载人工验收；正式试运行、培训与签字。
       </Text>
       <Box style={{ background: '#FFFFFF', borderRadius: 6, padding: 12 }}>
         <Text style={{ fontSize: 18, color: '#B03A35' }}>因此结论是“有条件通过”，不是“全部完成”。</Text>
