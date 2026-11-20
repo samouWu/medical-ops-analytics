@@ -3,17 +3,21 @@ import { computed, onMounted, ref } from 'vue'
 import PageHeader from '../components/PageHeader.vue'
 import FilterBar from '../components/FilterBar.vue'
 import MetricCard from '../components/MetricCard.vue'
-import MedicalDecor from '../components/MedicalDecor.vue'
+import ImportDialog from '../components/ImportDialog.vue'
 import LineChart from '../components/charts/LineChart.vue'
 import BarChart from '../components/charts/BarChart.vue'
 import StateBlock from '../components/StateBlock.vue'
 import AppIcon from '../components/AppIcon.vue'
-import { request } from '../api/client'
+import { downloadFile, request } from '../api/client'
 import { appState, filterParams, filters, loadMeta } from '../stores/app'
 import { errorMessage } from '../utils/format'
+import { downloadBlob } from '../utils/helpers'
 
 const loading = ref(false)
 const error = ref('')
+const notice = ref('')
+const importOpen = ref(false)
+const exporting = ref(false)
 const data = ref({ cards: [], trends: [], top_departments: [] })
 const drillDepartment = computed(() => appState.meta.departments.find((item) => item.dept_code === filters.dept_code))
 // 收入趋势与科室排行统一折算为万元，与指标卡口径保持一致。
@@ -40,6 +44,27 @@ async function fetchDashboard() {
   }
 }
 
+async function exportDashboard() {
+  exporting.value = true
+  notice.value = ''
+  try {
+    const { blob, filename } = await downloadFile('/export/management', filterParams(), '管理驾驶舱.xlsx')
+    downloadBlob(blob, filename)
+    notice.value = '管理驾驶舱 Excel 导出成功'
+  } catch (err) {
+    error.value = errorMessage(err)
+  } finally {
+    exporting.value = false
+  }
+}
+
+async function onImported(result) {
+  // 弹窗保持打开展示导入结果，看板在后台刷新。
+  notice.value = `已导入 ${result?.row_count ?? 0} 行数据（${result?.source_table || '目标表'}），数仓已同步重建`
+  await loadMeta()
+  await fetchDashboard()
+}
+
 async function drillIntoDepartment(params) {
   if (filters.dept_code) return
   const department = appState.meta.departments.find((item) => item.dept_name === params.name)
@@ -61,11 +86,16 @@ onMounted(async () => {
 
 <template>
   <div class="page dashboard-page">
-    <MedicalDecor variant="header" class="dashboard-header-decor" />
     <PageHeader title="管理驾驶舱" description="聚合核心运营指标，纵览全院医疗服务与经营态势">
       <template #actions>
         <button v-if="filters.dept_code" class="btn" :disabled="loading" @click="resetDrill">
           <AppIcon name="chevronRight" :size="15" class="back-icon" />返回全院
+        </button>
+        <button class="btn" @click="importOpen = true">
+          <AppIcon name="upload" :size="15" />导入数据
+        </button>
+        <button class="btn" :disabled="exporting" @click="exportDashboard">
+          <span v-if="exporting" class="spinner" /><AppIcon v-else name="download" :size="15" />{{ exporting ? '导出中' : '导出 Excel' }}
         </button>
         <button class="btn" :disabled="loading" @click="fetchDashboard">
           <AppIcon name="refresh" :size="15" />刷新数据
@@ -74,6 +104,8 @@ onMounted(async () => {
     </PageHeader>
 
     <FilterBar :loading="loading" @apply="fetchDashboard" />
+
+    <div v-if="notice" class="dashboard-notice"><AppIcon name="check" :size="16" />{{ notice }}</div>
 
     <div v-if="drillDepartment" class="drill-banner">
       <span>当前已下钻至 <strong>{{ drillDepartment.dept_name }}</strong>，可继续点击“返回全院”恢复</span>
@@ -140,6 +172,7 @@ onMounted(async () => {
         </div>
       </section>
     </div>
+    <ImportDialog :open="importOpen" @close="importOpen = false" @success="onImported" />
   </div>
 </template>
 
@@ -148,15 +181,17 @@ onMounted(async () => {
   position: relative;
 }
 
-.dashboard-header-decor {
-  position: absolute;
-  top: 16px;
-  right: 196px;
-  pointer-events: none;
-}
-
-@media (max-width: 1180px) {
-  .dashboard-header-decor { display: none; }
+.dashboard-notice {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 14px;
+  padding: 9px 13px;
+  color: #14805f;
+  font-size: 12px;
+  background: var(--success-soft);
+  border: 1px solid #ccece0;
+  border-radius: 7px;
 }
 
 .dashboard-error {

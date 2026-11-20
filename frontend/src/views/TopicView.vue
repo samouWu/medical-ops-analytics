@@ -142,7 +142,7 @@ onMounted(async () => {
         <button class="btn" :disabled="loading" @click="fetchTopic"><AppIcon name="refresh" :size="15" />刷新</button>
         <button class="btn btn-primary" :disabled="exporting || loading" @click="exportTopic">
           <span v-if="exporting" class="spinner" /><AppIcon v-else name="download" :size="15" />
-          {{ exporting ? '正在导出' : '导出报表' }}
+          {{ exporting ? '正在导出' : '导出 Excel' }}
         </button>
       </template>
     </PageHeader>

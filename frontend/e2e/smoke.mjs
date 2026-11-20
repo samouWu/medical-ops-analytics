@@ -31,6 +31,13 @@ try {
   record('自定义日期弹层', await page.getByText(/2025年4月/).last().isVisible())
   await page.keyboard.press('Escape')
 
+  record('驾驶舱导入导出入口', (await page.getByRole('button', { name: '导入数据' }).count()) === 1 && (await page.getByRole('button', { name: '导出 Excel' }).count()) === 1)
+  await page.getByRole('button', { name: '导入数据' }).click()
+  await page.getByText('导入业务数据').waitFor({ timeout: 5000 })
+  record('导入弹窗可打开', await page.getByText('点击选择文件，或拖拽文件到此处').isVisible())
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(300)
+
   await page.goto(`${BASE}/metrics`, { waitUntil: 'domcontentloaded' })
   await page.getByText('指标查询', { exact: true }).first().waitFor()
   await page.getByRole('button', { name: '按周' }).click()
