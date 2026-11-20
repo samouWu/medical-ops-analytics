@@ -231,20 +231,25 @@ def analytics(topic, start, end, user, dept_code=None):
         distribution = []
         table = {"columns": [], "rows": []}
         chart_type = "line"
+        trend_available = True
         if topic == "revenue":
             distribution = [{"name": "门诊收入", "value": cards[1]["value"]}, {"name": "住院收入", "value": cards[2]["value"]}]
             fee_rows = conn.execute("SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params])
             table = {"columns": [{"key": "name", "label": "费用类别"}, {"key": "value", "label": "金额（元）", "format": "money"}], "rows": [{"name": r[0], "value": round(r[1], 2)} for r in fee_rows]}
         elif topic in ("drugs", "consumables"):
             codes_filter = ("XY", "ZC") if topic == "drugs" else ("CL",)
-            rows = conn.execute(f"SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND fee_type_code IN ({','.join('?' for _ in codes_filter)}) AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *codes_filter, *params])
+            rows = conn.execute(f"SELECT fee_type_name,SUM(amount) FROM dwd_charge_detail WHERE fee_date BETWEEN ? AND ? AND fee_type_code IN ({','.join('?' for _ in codes_filter)}) AND "+where+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *codes_filter, *params]).fetchall()
             distribution = [{"name": r[0], "value": r[1]} for r in rows]
+            total_fee = sum(r[1] or 0 for r in rows)
+            table = {"columns": [{"key": "name", "label": "费别"}, {"key": "value", "label": "金额（元）", "format": "money"}, {"key": "share", "label": "占比", "format": "percent"}],
+                     "rows": [{"name": r[0], "value": round(r[1], 2), "share": safe_ratio(r[1], total_fee, 100)} for r in rows]}
         elif topic == "disease":
             disease_where = where
             rows = conn.execute("SELECT i.disease_code,d.disease_name,COUNT(*) n,AVG(i.total_fee),AVG(i.stay_days) FROM dwd_inpatient_stay i JOIN dim_disease d USING(disease_code) WHERE i.discharge_date BETWEEN ? AND ? AND "+disease_where.replace("dept_code", "i.dept_code")+" GROUP BY 1,2 ORDER BY n DESC", [start, end, *params])
             distribution = [{"name": r[1], "value": r[2], "avg_fee": round(r[3], 2), "avg_days": round(r[4], 2)} for r in rows]
             table = {"columns": [{"key": "name", "label": "病种"}, {"key": "value", "label": "出院人次"}, {"key": "avg_fee", "label": "次均费用（元）", "format": "money"}, {"key": "avg_days", "label": "平均住院日"}], "rows": distribution}
             trends = []
+            trend_available = False
             chart_type = "bar"
         elif topic == "resources":
             rows = conn.execute("SELECT d.dept_code,d.dept_name,d.bed_count,d.staff_count,SUM(s.outpatient_visits),SUM(s.discharges),SUM(s.occupied_bed_days),SUM(s.open_bed_days),SUM(s.total_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1,2,3,4 ORDER BY 8 DESC", [start, end, *params]).fetchall()
@@ -262,7 +267,18 @@ def analytics(topic, start, end, user, dept_code=None):
             distribution = [{"name": r[0], "value": r[1], "abnormal": r[2]} for r in rows]
             table = {"columns": [{"key": "name", "label": "检验项目"}, {"key": "value", "label": "报告数"}, {"key": "abnormal", "label": "异常/阳性数"}], "rows": distribution}
             trends = []
+            trend_available = False
             chart_type = "bar"
+        elif topic == "outpatient":
+            rows = conn.execute("SELECT d.dept_name,COUNT(*),COUNT(DISTINCT v.patient_key),SUM(v.fee_amount) FROM dwd_outpatient_visit v JOIN dim_department d USING(dept_code) WHERE v.visit_date BETWEEN ? AND ? AND "+where.replace("dept_code", "v.dept_code")+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params]).fetchall()
+            distribution = [{"name": r[0], "value": r[1]} for r in rows]
+            table = {"columns": [{"key": "name", "label": "科室"}, {"key": "value", "label": "门诊人次"}, {"key": "patients", "label": "就诊患者数"}, {"key": "avg_fee", "label": "次均费用（元）", "format": "money"}],
+                     "rows": [{"name": r[0], "value": r[1], "patients": r[2], "avg_fee": safe_ratio(r[3], r[1])} for r in rows]}
+        elif topic == "inpatient":
+            rows = conn.execute("SELECT d.dept_name,SUM(s.discharges),SUM(s.stay_days),SUM(s.inpatient_revenue) FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params]).fetchall()
+            distribution = [{"name": r[0], "value": r[1]} for r in rows]
+            table = {"columns": [{"key": "name", "label": "科室"}, {"key": "value", "label": "出院人次"}, {"key": "avg_stay", "label": "平均住院日"}, {"key": "avg_fee", "label": "次均费用（元）", "format": "money"}],
+                     "rows": [{"name": r[0], "value": r[1], "avg_stay": safe_ratio(r[2], r[1]), "avg_fee": safe_ratio(r[3], r[1])} for r in rows]}
         else:
             rows = conn.execute("SELECT d.dept_name,SUM(s."+dist_code+") FROM dws_dept_day s JOIN dim_department d USING(dept_code) WHERE s.stat_date BETWEEN ? AND ? AND "+where.replace("dept_code", "s.dept_code")+" GROUP BY 1 ORDER BY 2 DESC", [start, end, *params])
             distribution = [{"name": r[0], "value": r[1]} for r in rows]
@@ -270,4 +286,18 @@ def analytics(topic, start, end, user, dept_code=None):
         titles = {"outpatient": "科室门诊人次分布", "inpatient": "科室出院人次分布", "revenue": "收入构成（门诊 vs 住院）",
                   "drugs": "药品费别构成", "consumables": "耗材费别构成", "disease": "病种出院人次分布",
                   "resources": "科室床位使用率", "service": "检验项目分布"}
-        return {"cards": cards, "trends": trends, "distribution": distribution, "secondary_distribution": secondary_distribution if topic == "resources" else [], "table": table, "chart_type": chart_type, "bar_title": titles.get(topic, "结构分布"), "period": {"start": start, "end": end}}
+        source_spec = {"outpatient": ("dwd_outpatient_visit", "visit_date"), "inpatient": ("dwd_inpatient_stay", "discharge_date"),
+                       "revenue": ("dwd_charge_detail", "fee_date"), "drugs": ("dwd_charge_detail", "fee_date"),
+                       "consumables": ("dwd_charge_detail", "fee_date"), "disease": ("dwd_inpatient_stay", "discharge_date"),
+                       "resources": ("dws_dept_day", "stat_date"), "service": ("dwd_lis_report", "report_date")}
+        source_table, source_date = source_spec[topic]
+        source_rows = conn.execute(f"SELECT COUNT(*) FROM {source_table} WHERE {source_date} BETWEEN ? AND ? AND {where}", [start, end, *params]).fetchone()[0]
+        group_by = {"revenue": "按费别聚合", "drugs": "按费别聚合", "consumables": "按费别聚合",
+                    "service": "按检验项目聚合", "disease": "按病种聚合"}.get(topic, "按科室聚合")
+        source_note = f"来源 {source_table}：统计期 {source_rows:,} 行明细{group_by}，未做人工补数或放大"
+        if topic == "outpatient":
+            source_note += "；各科室源记录均为 900 条（课程数据集等量抽样），患者数与次均费用各不相同"
+        return {"cards": cards, "trends": trends, "trend_available": trend_available, "distribution": distribution,
+                "secondary_distribution": secondary_distribution if topic == "resources" else [], "table": table,
+                "chart_type": chart_type, "bar_title": titles.get(topic, "结构分布"), "source_note": source_note,
+                "period": {"start": start, "end": end}}

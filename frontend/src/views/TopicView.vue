@@ -59,6 +59,19 @@ const scatterPoints = computed(() => (data.value.table?.rows || []).map((item) =
   item.name,
   12,
 ]))
+const hasTrend = computed(() => data.value.trend_available !== false && (data.value.trends || []).length > 0)
+// 选择能让末行最满的列数（最多5列），避免出现半行空白。
+const cardColumns = computed(() => {
+  const total = (data.value.cards || []).length
+  if (total <= 1) return total || 1
+  let best = Math.min(total, 5)
+  let bestGap = total
+  for (let cols = Math.min(total, 5); cols >= 2; cols -= 1) {
+    const gap = (cols - (total % cols)) % cols
+    if (gap < bestGap) { best = cols; bestGap = gap }
+  }
+  return best
+})
 const tableColumns = computed(() => data.value.table?.columns || [])
 const tableRows = computed(() => data.value.table?.rows || [])
 const drillDepartment = computed(() => appState.meta.departments.find((item) => item.dept_code === filters.dept_code))
@@ -144,12 +157,12 @@ onMounted(async () => {
     <div v-if="error" class="page-message error"><AppIcon name="alert" :size="16" /><span>{{ error }}</span><button class="btn btn-sm" @click="fetchTopic">重试</button></div>
     <div v-if="notice" class="page-message success"><AppIcon name="check" :size="16" />{{ notice }}</div>
 
-    <div v-if="data.cards.length" class="metrics-grid">
+    <div v-if="data.cards.length" class="metrics-grid" :style="{ '--cols': cardColumns }">
       <MetricCard v-for="(card, index) in data.cards" :key="card.key" :card="card" :index="index" />
     </div>
 
-    <div class="dashboard-grid">
-      <section class="card">
+    <div class="dashboard-grid" :class="{ single: !hasTrend }">
+      <section v-if="hasTrend" class="card">
         <div class="card-header">
           <div><h2 class="card-heading">{{ title }}趋势</h2><p class="card-subheading">核心指标随时间变化情况</p></div>
           <span class="status-badge info">趋势分析</span>
@@ -199,9 +212,9 @@ onMounted(async () => {
       </section>
     </div>
 
-    <section class="card table-card">
+    <section v-if="tableColumns.length && tableRows.length" class="card table-card">
       <div class="card-header">
-        <div><h2 class="card-heading">运营明细</h2><p class="card-subheading">当前筛选条件下的主题明细数据</p></div>
+        <div><h2 class="card-heading">运营明细</h2><p class="card-subheading">{{ data.source_note || '当前筛选条件下的主题明细数据' }}</p></div>
         <span v-if="tableRows.length" class="status-badge">共 {{ tableRows.length }} 条</span>
       </div>
       <DataTable
@@ -217,6 +230,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.dashboard-grid.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .page-message {
   display: flex;
   align-items: center;

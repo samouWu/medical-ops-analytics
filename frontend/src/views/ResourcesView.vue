@@ -88,7 +88,7 @@ onMounted(async () => {
     <div v-if="error" class="resource-message error"><AppIcon name="alert" :size="16" /><span>{{ error }}</span><button class="btn btn-sm" @click="fetchData">重试</button></div>
     <div v-if="notice" class="resource-message success"><AppIcon name="check" :size="16" />{{ notice }}</div>
 
-    <div v-if="data.cards.length" class="metrics-grid resource-metrics">
+    <div v-if="data.cards.length" class="metrics-grid resource-metrics" :style="{ '--cols': data.cards.length }">
       <MetricCard v-for="(card, index) in data.cards" :key="card.key" :card="card" :index="index" />
     </div>
 

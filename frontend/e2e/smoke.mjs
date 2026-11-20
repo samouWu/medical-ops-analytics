@@ -61,6 +61,16 @@ try {
   await page.getByText('用户管理', { exact: true }).first().waitFor()
   record('系统管理四个标签', await page.getByRole('button', { name: /角色权限/ }).isVisible() && await page.getByRole('button', { name: /ETL任务管理/ }).isVisible())
 
+  await page.goto(`${BASE}/disease`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(2200)
+  const emptyBlocks = await page.getByText('暂无数据', { exact: true }).count()
+  record('病种分析无空态卡片', emptyBlocks === 0, `empty=${emptyBlocks}`)
+  record('病种明细有数据', await page.locator('.data-table tbody tr').count() >= 10)
+
+  await page.goto(`${BASE}/drugs`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(2200)
+  record('药品明细有费别数据', await page.locator('.data-table tbody tr').count() >= 2)
+
   await page.goto(`${BASE}/resources`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1000)
   record('资源效率页', await page.getByText('资源效率', { exact: true }).first().isVisible())
