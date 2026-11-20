@@ -147,7 +147,7 @@ onMounted(async () => {
           <div class="metric-search"><AppIcon name="search" :size="15" /><input v-model="search" placeholder="搜索指标名称、编码或主题"></div>
           <div v-if="loadingMetrics" class="metric-options"><div v-for="i in 3" :key="i" class="skeleton option-skeleton" /></div>
           <div v-else class="metric-options">
-            <label v-for="metric in filteredMetrics" :key="metric.code" class="metric-option" :class="{ selected: selectedMetrics.includes(metric.code), disabled: metric.supported === false }">
+            <label v-for="metric in filteredMetrics" :key="metric.code" class="metric-option" :class="{ selected: selectedMetrics.includes(metric.code), disabled: metric.supported === false }" :title="metric.formula || metric.description">
               <input type="checkbox" :checked="selectedMetrics.includes(metric.code)" :disabled="metric.supported === false" @change="toggleMetric(metric.code)">
               <span class="custom-check"><AppIcon name="check" :size="12" /></span>
               <span><strong>{{ metric.name }}</strong><small>{{ metric.code }} · {{ metric.topic }}</small></span>

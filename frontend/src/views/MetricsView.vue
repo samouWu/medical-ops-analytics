@@ -117,7 +117,7 @@ onMounted(async () => {
         </div>
         <div class="catalog-list">
           <StateBlock v-if="loadingMetrics" type="loading" compact />
-          <button v-for="metric in filteredMetrics" v-else :key="metric.code" :class="{ active: selectedCode === metric.code }" :disabled="metric.supported === false" @click="selectMetric(metric)">
+          <button v-for="metric in filteredMetrics" v-else :key="metric.code" :class="{ active: selectedCode === metric.code }" :disabled="metric.supported === false" :title="metric.formula || metric.description" @click="selectMetric(metric)">
             <span class="catalog-item-top"><strong>{{ metric.name }}</strong><em v-if="metric.unit">{{ metric.unit }}</em></span>
             <span class="catalog-code">{{ metric.code }}</span>
             <span class="catalog-topic">{{ metric.topic }}<i v-if="metric.supported === false">暂不支持</i></span>
