@@ -5,7 +5,10 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+.mypy_cache/
+.ruff_cache/
 
 # 环境变量与密钥
 .env
@@ -14,6 +17,7 @@ htmlcov/
 
 # 前端
 node_modules/
+playwright-report/
 frontend/dist/
 frontend/coverage/
 
