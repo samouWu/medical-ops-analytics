@@ -24,3 +24,17 @@
 ```
 
 对账、安全、压测与查询计划报告写入 `data/derived/`，该目录不提交；脚本本身可复现实验。
+
+## 推荐执行顺序
+
+1. `build_supplemental_12m.py`（仅在需要 12 个月独立库时）
+2. `export_init_data.py`（修改科室、指标或规则后重算快照）
+3. `check_reconciliation.py`（确认源到 ADS 数值一致）
+4. `security_check.py`（确认鉴权、越权与输入校验）
+5. `check_query_plans.py`（检查慢 SQL 与索引使用）
+6. `load_test.py`（单机并发冒烟）
+7. `check_deliverables.py`（交付物、文档链接与测试证据总检）
+
+第 3—7 步依赖后端已完成 ETL；压测与 E2E 还需要后端 8765、前端 5173 已启动。
+
+所有报告写入 `data/derived/`，重复执行会覆盖同名文件。
