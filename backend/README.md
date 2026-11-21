@@ -45,3 +45,18 @@ PYTHONPATH=. python -m pytest
 ```
 
 当前基线：39 项通过、覆盖率 87.51%。覆盖率报告写入运行时目录，不提交。
+
+## 核心数据表
+
+| 表 | 当前行数 | 说明 |
+|---|---:|---|
+| `dwd_outpatient_visit` | 9,000 | 门诊就诊明细，含号别、费用、科室与日期 |
+| `dwd_inpatient_stay` | 1,500 | 住院就诊明细，含出入院、床日、病种与药耗 |
+| `dwd_charge_detail` | 44,078 | 收费明细，支撑药/耗结构与费别分析 |
+| `dwd_emr_record` | 1,500 | 病历记录，用于病历覆盖率与病种关联 |
+| `dwd_lis_report` | 2,934 | 检验报告，用于异常率与检验覆盖率 |
+| `dwd_finance_day` | 910 | 财务日汇总，用于质量校验 |
+| `dws_dept_day` | 910 | 科室日汇总，公共指标的事实来源 |
+| `ads_metric_result` | 47,520 | 40 项指标 × 日/周/月 × 科室 |
+
+表结构变更必须同步 `sql/*/schema.sql`，并通过 `tests/test_schema.py` 的参考 DDL 一致性检查。
