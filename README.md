@@ -96,18 +96,6 @@ flowchart LR
   Q -.校验.-> W
 ```
 
-## 界面预览
-
-| 管理驾驶舱 | 指标查询 |
-|---|---|
-| ![驾驶舱](docs/screenshots/02-dashboard.png) | ![指标查询](docs/screenshots/06-metrics.png) |
-
-| 资源效率（雷达 + 热力） | 数据质量与告警 |
-|---|---|
-| ![资源效率](docs/screenshots/10-resource-charts.png) | ![数据质量](docs/screenshots/09-quality.png) |
-
-更多截图与说明见 [docs/screenshots](docs/screenshots/README.md)。
-
 ## 快速启动
 
 ### 1. 准备环境
