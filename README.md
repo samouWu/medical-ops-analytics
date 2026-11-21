@@ -1,6 +1,29 @@
 # 医疗运营数据主题分析平台
 
-基于 FastAPI、SQLite、Vue 3 与 ECharts 的医疗运营教学项目。平台将六份模拟 CSV 经 ODS/DWD/DWS/ADS 分层处理，提供运营看板、指标查询、多维报表、智能问数、数据质量与审计功能。
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
+![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)
+![ECharts](https://img.shields.io/badge/ECharts-6.1-AA344D)
+![Tests](https://img.shields.io/badge/backend%20tests-39%20passed-success)
+![Coverage](https://img.shields.io/badge/coverage-87.51%25-brightgreen)
+![E2E](https://img.shields.io/badge/E2E-24%2F24-success)
+
+面向医院运营管理部门的课程项目：把 HIS、EMR、LIS、收费与财务六类模拟数据，经 **ODS → DWD → DWS → ADS** 四层数仓加工，形成统一指标服务，支撑管理驾驶舱、八类主题分析、指标查询、多维报表、智能问数与自动报告。
+
+<p align="center">
+  <img src="docs/screenshots/02-dashboard.png" alt="管理驾驶舱" width="92%" />
+</p>
+
+<p align="center"><sub>管理驾驶舱：门诊 9,000 人次、出院 1,500 人次、医疗总收入 2,774.58 万元、床位使用率 45.60%、药占比 35.26%</sub></p>
+
+## 项目状态
+
+| 维度 | 当前结果 |
+|---|---|
+| 课程交付 | 六源接入、四层数仓、8 个主题、39 项可查指标、10 类图表、智能问答与报告 |
+| 自动化验证 | 后端 39 项、前端 19 项、E2E 24/24、源到 ADS 对账 26/26、安全冒烟 13/13 |
+| 性能冒烟 | 8 并发 120 请求成功率 100%，P95 2.4 秒（单机，不是生产容量结论） |
+| 使用边界 | 课程教学与模拟数据分析；未做生产验收、真实 LLM Key 评测与 Docker 实机验证 |
 
 > **使用边界**：本项目仅用于课程教学与模拟数据分析，未达到生产验收标准。49项指标中40项可计算、9项因缺少源字段不可计算；床位与人力来自教学配置；DRG/DIP相关结果为估算，不是医保官方分组或绩效结论。本项目没有百万并发或生产级性能验证。
 
@@ -9,7 +32,7 @@
 - 后端：FastAPI、Pydantic、PyJWT、SQLite（WAL模式）、httpx。
 - ETL：CSV/XLSX/XLSM读取、字段与格式校验、批次记录、增量过滤、失败重试、幂等写入、质量规则、八张主题DWS集市和DWD统一明细宽表。
 - 指标：49项目录、40项口径可算（当前39项，K25缺上年同期）；全部40项在ADS预计算日/周/月结果，支持按日期区间回刷。
-- 前端：Vue 3、Vue Router、axios、ECharts、Vite；5个通用图表组件，支持科室下钻、日/周/月粒度、同比/环比。
+- 前端：Vue 3、Vue Router、axios、ECharts、Vite；9 个图表组件覆盖 10 类图形，支持科室下钻、日/周/月粒度、同比/环比。
 - 智能分析：默认 DeepSeek，可切换 Kimi；受控指标问数、指标知识问答和安全只读NL2SQL接口，未配置Key时明确回退。
 - 系统管理：用户、角色、数据源和ETL任务管理，支持新增、编辑、删除、连接测试和任务执行。
 - 安全基础：PBKDF2密码散列、JWT、角色权限、科室数据范围、全量GET查询审计、Trace ID和SQL白名单校验。
@@ -19,16 +42,60 @@
 ```text
 backend/                 FastAPI、ETL、指标服务与后端测试
 frontend/                Vue 3 + ECharts 前端与前端测试
-data/mock_his/           五份HIS/EMR/LIS模拟CSV
-data/files/              财务模拟CSV
+data/mock_his/           五份 HIS/EMR/LIS 模拟 CSV
+data/files/              财务模拟 CSV
 data/init/               维度、指标与质量规则初始化快照
-data/supplemental_12m/   12个月附加模拟数据与独立数仓（不进入默认主题）
-data/derived/            默认SQLite与上传临时目录（运行时生成，不提交）
-sql/                     SQLite五层参考DDL
-deploy/                  前后端镜像、Nginx与Compose
-scripts/                 Linux/macOS启动脚本
-docs/                    项目、指标、部署、测试、进度与数据字典
+data/supplemental_12m/   12 个月附加模拟数据与独立数仓（不进入默认主题）
+data/derived/            默认 SQLite 与上传目录（运行时生成，不提交）
+sql/                     SQLite 五层参考 DDL
+deploy/                  前后端镜像、Nginx 与 Compose
+scripts/                 数据构建、对账、安全与压测脚本
+docs/                    需求、设计、指标、测试、验收与答辩文档
 ```
+
+各目录的详细说明：
+
+| 目录 | 说明 |
+|---|---|
+| [backend](backend/README.md) | 接口分层、指标服务、ETL 与测试入口 |
+| [frontend](frontend/README.md) | 页面、图表组件、构建与 E2E |
+| [data](data/README.md) | 六源字段、行数、初始化快照与隐私边界 |
+| [sql](sql/README.md) | ODS/DWD/DWS/ADS 参考 DDL |
+| [scripts](scripts/README.md) | 对账、交付检查、安全、压测与附加数据脚本 |
+| [deploy](deploy/README.md) | Docker 镜像与 Compose 演示部署 |
+| [docs](docs/README.md) | 全套项目文档索引 |
+
+## 系统架构
+
+```mermaid
+flowchart LR
+  A[HIS 门诊/住院] --> O[ODS 贴源层]
+  B[收费明细] --> O
+  C[EMR 病历] --> O
+  D[LIS 检验] --> O
+  E[财务汇总] --> O
+  O --> W[DWD 标准化明细]
+  W --> S[DWS 八张主题日汇总]
+  S --> M[ADS 指标结果<br/>日/周/月]
+  M --> API[统一 RESTful API]
+  API --> V[驾驶舱与主题看板]
+  API --> R[多维报表与 Excel 导出]
+  API --> AI[智能问数与报告生成]
+  Q[质量规则与告警] -.阻断异常批次.-> O
+  Q -.校验.-> W
+```
+
+## 界面预览
+
+| 管理驾驶舱 | 指标查询 |
+|---|---|
+| ![驾驶舱](docs/screenshots/02-dashboard.png) | ![指标查询](docs/screenshots/06-metrics.png) |
+
+| 资源效率（雷达 + 热力） | 数据质量与告警 |
+|---|---|
+| ![资源效率](docs/screenshots/10-resource-charts.png) | ![数据质量](docs/screenshots/09-quality.png) |
+
+更多截图与说明见 [docs/screenshots](docs/screenshots/README.md)。
 
 ## 快速启动
 
@@ -220,7 +287,7 @@ cd frontend && npm test && npm run lint && npm run build && npm run e2e
 
 执行E2E前需确保前端5173、后端8765均已启动。可先运行 `python scripts/load_test.py --workers 8 --requests 120` 做单机并发冒烟。
 
-**本次交付已执行六源全量/增量ETL、DWD宽表（10,500行）、八张主题集市、40项三粒度ADS（47,520行）、后端39项测试（`backend/app`覆盖率86.80%）、前端19项单元测试、ESLint和734模块生产构建；50问受控问数评测为50/50、100%；浏览器E2E 24/24、HTTP安全冒烟13/13、源到ADS对账26/26通过；8并发120请求压测成功率100%。** Docker、真实第三方LLM调用、生产级渗透和容量测试仍未完成，不能据此宣称全部课程任务或生产部署已经通过。详见[测试计划与报告](docs/测试计划与报告.md)和[50问评测报告](docs/50问评测报告.md)。
+**本次交付已执行六源全量/增量ETL、DWD宽表（10,500行）、八张主题集市、40项三粒度ADS（47,520行）、后端39项测试（`backend/app`覆盖率87.51%）、前端19项单元测试、ESLint与生产构建；50问受控问数评测为50/50、100%；浏览器E2E 24/24、HTTP安全冒烟13/13、源到ADS对账26/26通过；8并发120请求压测成功率100%。** Docker、真实第三方LLM调用、生产级渗透和容量测试仍未完成，不能据此宣称全部课程任务或生产部署已经通过。详见[测试计划与报告](docs/测试计划与报告.md)和[50问评测报告](docs/50问评测报告.md)。
 
 ## 安全说明
 

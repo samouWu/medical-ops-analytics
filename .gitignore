@@ -27,7 +27,7 @@ data/derived/
 *.bak
 
 # 演示文稿编辑缓存
-docs/答辩材料/.slidep/
+.slidep/
 
 # 日志与临时文件
 *.log
