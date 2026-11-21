@@ -15,14 +15,14 @@ def test_api_error_and_validation_branches(client, admin_headers):
     assert client.get("/api/v1/dashboards/topic", headers=admin_headers).status_code == 200
     visible_metrics = client.get("/api/v1/metrics", headers=admin_headers).json()["data"]
     # 30项口径可算，其中K25缺上年同期数据，默认目录隐藏，实际可查29项。
-    assert len(visible_metrics) == 30
+    assert len(visible_metrics) == 39
     assert all(item["supported"] and item["available"] for item in visible_metrics)
     assert all(item["formula"] for item in visible_metrics)
     unavailable = client.get("/api/v1/metrics?include_unavailable=true", headers=admin_headers).json()["data"]
-    assert len(unavailable) == 31
+    assert len(unavailable) == 40
     assert [item["code"] for item in unavailable if not item["available"]] == ["K25"]
     all_metrics = client.get("/api/v1/metrics?include_unsupported=true", headers=admin_headers).json()["data"]
-    assert len(all_metrics) == 40
+    assert len(all_metrics) == 49
     assert client.get("/api/v1/metrics?topic=门诊&keyword=床位", headers=admin_headers).status_code == 200
     assert client.get("/api/v1/metrics?topic=不存在", headers=admin_headers).json()["data"] == []
     assert client.get("/api/v1/metrics/K999/values", headers=admin_headers).status_code == 400

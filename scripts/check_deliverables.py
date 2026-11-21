@@ -103,7 +103,7 @@ def check_supplemental_db():
         themes = conn.execute("SELECT COUNT(*) FROM dws_outpatient_day").fetchone()[0]
         ads_metrics = conn.execute("SELECT COUNT(DISTINCT metric_code),COUNT(*) FROM ads_metric_result").fetchone()
         wide = conn.execute("SELECT COUNT(*) FROM dwd_encounter_wide").fetchone()[0]
-    assert ads_metrics == (31, 146630), ads_metrics
+    assert ads_metrics == (40, 189200), ads_metrics
     assert wide == 41022, wide
     return {"date_range": {"start": bounds[0], "end": bounds[1]}, "month_count": bounds[2],
             "charge_total": charge_total, "bill_total": bill_total, "revenue_total": revenue_total,
@@ -122,8 +122,8 @@ def check_data():
         dim_date = conn.execute("SELECT COUNT(*) FROM dim_date").fetchone()[0]
         ads_metrics = conn.execute("SELECT COUNT(DISTINCT metric_code),COUNT(*) FROM ads_metric_result").fetchone()
         wide = conn.execute("SELECT COUNT(*) FROM dwd_encounter_wide").fetchone()[0]
-    assert metrics == (40, 31), metrics
-    assert ads_metrics == (31, 36828), ads_metrics
+    assert metrics == (49, 40), metrics
+    assert ads_metrics == (40, 47520), ads_metrics
     assert sum(themes.values()) == 7679
     assert dim_date == 91
     assert wide == 10500

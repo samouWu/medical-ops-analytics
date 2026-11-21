@@ -44,7 +44,7 @@ try {
   await page.waitForTimeout(1200)
   record('指标查询页与按周切换', await page.getByText(/个数据点/).isVisible().catch(() => false))
   const catalogCount = await page.locator('.catalog-code').count()
-  record('指标目录只展示当前可计算指标', catalogCount === 30, `count=${catalogCount}`)
+  record('指标目录只展示当前可计算指标', catalogCount === 39, `count=${catalogCount}`)
   const formula = await page.locator('.definition-formula code').first().innerText().catch(() => '')
   record('指标定义展示计算公式', formula.length > 4, formula.slice(0, 40))
 
@@ -76,6 +76,10 @@ try {
   await page.waitForTimeout(2200)
   record('质量页含告警区块', await page.getByText('质量告警', { exact: true }).count() === 1)
   record('顶栏告警铃铛存在', await page.locator('.alert-bell').count() === 1)
+
+  await page.goto(`${BASE}/inpatient`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(2400)
+  record('住院页含30天再入院率', await page.getByText('30天再入院率', { exact: true }).count() === 1)
 
   await page.goto(`${BASE}/disease`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(2200)

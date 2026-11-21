@@ -88,6 +88,23 @@ def test_quality_alert_ack_flow(client, admin_headers):
         conn.execute("DELETE FROM quality_alert WHERE rule_code='TEST_RULE'")
 
 
+def test_additional_clinical_metrics(client, admin_headers):
+    expected = {
+        "K40": 17.3444, "K41": 33.5889, "K42": 40.0216, "K43": 14.9545,
+        "K44": 1670.7018, "K45": 157.3297, "K46": 1.1333,
+        "K47": 17.697, "K48": 100.0, "K49": 100.0,
+    }
+    for code, value in expected.items():
+        data = client.get(f"/api/v1/metrics/{code}/values?grain=month", headers=admin_headers).json()["data"]
+        assert data["summary"] == value, code
+    readmission = client.get("/api/v1/metrics/K47/values?grain=month", headers=admin_headers).json()["data"]
+    # 6月出院没有完整30天观察窗，不能用0冒充再入院率。
+    assert readmission["points"][-1]["value"] is None
+    inpatient = client.get("/api/v1/analytics/inpatient", headers=admin_headers).json()["data"]
+    assert "30天再入院率" in [item["label"] for item in inpatient["cards"]]
+    assert "完整30天观察窗" in inpatient["card_note"]
+
+
 def test_disease_cards_and_resource_order(client, admin_headers):
     disease = client.get("/api/v1/analytics/disease", headers=admin_headers).json()["data"]
     labels = [item["label"] for item in disease["cards"]]
@@ -130,7 +147,7 @@ def test_weekly_metric_values_and_ads_range_refresh(client, admin_headers):
     assert refresh.status_code == 200
     first_counts = {key: value["rows"] for key, value in refresh.json()["data"].items()}
     assert first_counts["week"] > 0
-    assert first_counts["month"] == 31*11
+    assert first_counts["month"] == 40*11
     repeated = client.post("/api/v1/etl/ads/refresh", headers=admin_headers, json={
         "start": "2025-05-01", "end": "2025-05-31", "grains": ["week", "month"],
     })

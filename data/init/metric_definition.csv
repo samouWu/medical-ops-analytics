@@ -39,3 +39,12 @@ K37,门诊患者人均就诊次数,门诊,次/人,True,门诊就诊人次/统计
 K38,住院患者人均住院次数,住院,次/人,True,出院人次/统计期内住院患者去重人数,K08 出院人次 ÷ COUNT(DISTINCT patient_key)（出院患者）
 K39,检验结果异常率,服务,%,True,异常或阳性检验报告数/检验报告总数×100%,"SUM(result_text IN ('异常','阳性')) ÷ COUNT(*) FROM dwd_lis_report × 100%"
 K40,专家号占比,门诊,%,True,专家号就诊人次占门诊人次的比例，反映门诊号别结构,COUNT(visit_type='专家') ÷ K01 门诊人次 × 100%
+K41,急诊就诊占比,门诊,%,True,急诊就诊人次占门诊人次的比例，观察号别与就诊类型结构,COUNT(visit_type='急诊') ÷ K01 门诊人次 × 100%
+K42,住院药占比,收入,%,True,住院患者药品费用占住院结算总费用的比例,SUM(dwd_inpatient_stay.drug_fee) ÷ SUM(dwd_inpatient_stay.total_fee) × 100%
+K43,住院耗占比,收入,%,True,住院患者耗材费用占住院结算总费用的比例,SUM(dwd_inpatient_stay.consumable_fee) ÷ SUM(dwd_inpatient_stay.total_fee) × 100%
+K44,住院床日费用,收入,元/床日,True,住院结算总费用除以实际占用床日，反映单位床日费用,SUM(dwd_inpatient_stay.total_fee) ÷ SUM(dwd_inpatient_stay.stay_days)
+K45,日均在院人数,住院,人,True,统计期实际占用床日除以天数，折算每日平均在院患者数,K10 实际占用床日 ÷ 统计期天数
+K46,当日出院占比,住院,%,True,入院当日即出院（stay_days=0）的出院人次占比,COUNT(stay_days=0) ÷ K08 出院人次 × 100%
+K47,30天再入院率,质量,%,True,具有完整30天观察窗的出院患者中，出院后30天内再次入院的占比,30天内再次入院的出院人次 ÷ 具有完整30天观察窗的出院人次 × 100%；数据截止日前30天出院不进入分母
+K48,病历覆盖率,质量,%,True,有电子病历记录的出院人次占全部出院人次的比例,COUNT(DISTINCT 有 dwd_emr_record 关联的出院 visit_id) ÷ K08 出院人次 × 100%
+K49,检验覆盖率,服务,%,True,有检验报告的出院人次占全部出院人次的比例,COUNT(DISTINCT 有 dwd_lis_report 关联的出院 visit_id) ÷ K08 出院人次 × 100%

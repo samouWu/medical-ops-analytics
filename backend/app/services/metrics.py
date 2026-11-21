@@ -79,6 +79,24 @@ METRICS = [
      "SUM(result_text IN ('异常','阳性')) ÷ COUNT(*) FROM dwd_lis_report × 100%"),
     ("K40", "专家号占比", "门诊", "%", True, "专家号就诊人次占门诊人次的比例，反映门诊号别结构",
      "COUNT(visit_type='专家') ÷ K01 门诊人次 × 100%"),
+    ("K41", "急诊就诊占比", "门诊", "%", True, "急诊就诊人次占门诊人次的比例，观察号别与就诊类型结构",
+     "COUNT(visit_type='急诊') ÷ K01 门诊人次 × 100%"),
+    ("K42", "住院药占比", "收入", "%", True, "住院患者药品费用占住院结算总费用的比例",
+     "SUM(dwd_inpatient_stay.drug_fee) ÷ SUM(dwd_inpatient_stay.total_fee) × 100%"),
+    ("K43", "住院耗占比", "收入", "%", True, "住院患者耗材费用占住院结算总费用的比例",
+     "SUM(dwd_inpatient_stay.consumable_fee) ÷ SUM(dwd_inpatient_stay.total_fee) × 100%"),
+    ("K44", "住院床日费用", "收入", "元/床日", True, "住院结算总费用除以实际占用床日，反映单位床日费用",
+     "SUM(dwd_inpatient_stay.total_fee) ÷ SUM(dwd_inpatient_stay.stay_days)"),
+    ("K45", "日均在院人数", "住院", "人", True, "统计期实际占用床日除以天数，折算每日平均在院患者数",
+     "K10 实际占用床日 ÷ 统计期天数"),
+    ("K46", "当日出院占比", "住院", "%", True, "入院当日即出院（stay_days=0）的出院人次占比",
+     "COUNT(stay_days=0) ÷ K08 出院人次 × 100%"),
+    ("K47", "30天再入院率", "质量", "%", True, "具有完整30天观察窗的出院患者中，出院后30天内再次入院的占比",
+     "30天内再次入院的出院人次 ÷ 具有完整30天观察窗的出院人次 × 100%；数据截止日前30天出院不进入分母"),
+    ("K48", "病历覆盖率", "质量", "%", True, "有电子病历记录的出院人次占全部出院人次的比例",
+     "COUNT(DISTINCT 有 dwd_emr_record 关联的出院 visit_id) ÷ K08 出院人次 × 100%"),
+    ("K49", "检验覆盖率", "服务", "%", True, "有检验报告的出院人次占全部出院人次的比例",
+     "COUNT(DISTINCT 有 dwd_lis_report 关联的出院 visit_id) ÷ K08 出院人次 × 100%"),
 ]
 METRIC_FIELDS = ("code", "name", "topic", "unit", "supported", "description", "formula")
 METRIC_MAP = {item[0]: dict(zip(METRIC_FIELDS, item)) for item in METRICS}
@@ -88,13 +106,14 @@ METRIC_MAP = {item[0]: dict(zip(METRIC_FIELDS, item)) for item in METRICS}
 ACTUAL_OPEN_BEDS = 345
 
 # 以“元”为单位的金额类指标，前端统一按万元展示。
-MONEY_CODES = {"K16", "K17", "K18", "K19", "K20", "K21", "K23", "K32"}
+MONEY_CODES = {"K16", "K17", "K18", "K19", "K20", "K21", "K23", "K32", "K44"}
 
 # 口径已实现、但当前数据集算不出结果的指标：仅在审计模式展示，默认目录隐藏。
 DATA_GAPS = {"K25": "课程数据集仅含 2025-04 至 2025-06，缺少上年同期数据，同比无法计算"}
 
 
 def safe_ratio(numerator: float, denominator: float, multiplier: float = 1.0):
-    if denominator == 0:
+    # 空窗口 SQL 聚合会返回 None，与 0 一样视为无分母，不用 0 冒充指标结果。
+    if not denominator:
         return None
     return round(numerator / denominator * multiplier, 4)
