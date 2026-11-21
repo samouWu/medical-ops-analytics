@@ -27,6 +27,17 @@
 
 > **使用边界**：本项目仅用于课程教学与模拟数据分析，未达到生产验收标准。49项指标中40项可计算、9项因缺少源字段不可计算；床位与人力来自教学配置；DRG/DIP相关结果为估算，不是医保官方分组或绩效结论。本项目没有百万并发或生产级性能验证。
 
+## 快速导航
+
+| 想了解 | 入口 |
+|---|---|
+| 项目怎么跑起来 | [快速启动](#快速启动) · [backend](backend/README.md) · [frontend](frontend/README.md) |
+| 数据从哪来、字段是什么 | [data 说明](data/README.md) · [数据字典](docs/数据字典.md) |
+| 指标怎么算、为什么有不可算项 | [指标口径手册](docs/指标口径手册.md) |
+| 验收结果和测试证据 | [验收报告](docs/验收报告.md) · [测试计划与报告](docs/测试计划与报告.md) |
+| 界面长什么样 | [系统截图](docs/screenshots/README.md) |
+| 版本变化 | [CHANGELOG](CHANGELOG.md) |
+
 ## 功能与技术栈
 
 - 后端：FastAPI、Pydantic、PyJWT、SQLite（WAL模式）、httpx。
